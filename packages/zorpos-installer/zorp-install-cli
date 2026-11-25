@@ -39,10 +39,12 @@ else
 fi
 partprobe "$DISK" 2>/dev/null || true; udevadm settle
 mkfs.ext4 -qF -L zorpos "$(part 2)"
-mkdir -p "$T"; mount "$(part 2)" "$T"
+((UEFI)) && mkfs.fat -F32 -n ZORP_ESP "$(part 1)" >/dev/null
+udevadm settle
+# explicit types: right after mkfs the probe can still see stale signatures
+mkdir -p "$T"; mount -t ext4 "$(part 2)" "$T"
 if ((UEFI)); then
-  mkfs.fat -F32 -n ZORP_ESP "$(part 1)" >/dev/null
-  mkdir -p "$T/boot"; mount "$(part 1)" "$T/boot"
+  mkdir -p "$T/boot"; mount -t vfat "$(part 1)" "$T/boot"
 fi
 
 log "copying the specimen (live system) to disk"
