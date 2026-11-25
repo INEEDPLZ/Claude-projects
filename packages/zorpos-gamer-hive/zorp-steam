@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Steam wrapper: first-run tuning, the "Docking with Steam..." splash, then the real Steam.
+steam_dir="${XDG_DATA_HOME:-$HOME/.local/share}/Steam"
+mkdir -p "$steam_dir"
+dev="$steam_dir/steam_dev.cfg"
+if [[ ! -f $dev ]]; then
+  # shader pre-caching is on by default in Steam; this lets background shader compiles use half the cores,
+  # and disables HTTP/2 for downloads, which is often much faster on Linux
+  t=$(( $(nproc) / 2 )); (( t < 1 )) && t=1
+  printf '@nClientDownloadEnableHTTP2PlatformLinux 0\nunShaderBackgroundProcessingThreads %s\n' "$t" > "$dev"
+fi
+if [[ -z ${ZORP_NO_SPLASH:-} && ( -n ${WAYLAND_DISPLAY:-} || -n ${DISPLAY:-} ) ]]; then
+  /usr/lib/zorpos/docking-splash &
+fi
+exec /usr/bin/steam "$@"

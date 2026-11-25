@@ -1,0 +1,24 @@
+# Maintainer: ZorpOS Mothership Collective
+# udev rules for third-party game controllers (8BitDo, Nintendo, Sony, Hori, ...).
+# Replaces the AUR package of the same name; built straight from upstream.
+pkgname=game-devices-udev
+pkgver=1.1
+pkgrel=1
+pkgdesc="udev rules for game controllers (built for ZorpOS)"
+arch=(any)
+url="https://codeberg.org/fabiscafe/game-devices-udev"
+license=(MIT)
+depends=(systemd)
+makedepends=(git meson)
+source=("git+${url}.git#tag=${pkgver}")
+sha256sums=(SKIP)
+
+build() {
+  arch-meson game-devices-udev build
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "$pkgdir"
+  install -Dm644 game-devices-udev/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

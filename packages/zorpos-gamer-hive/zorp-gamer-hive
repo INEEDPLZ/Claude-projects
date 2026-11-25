@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Gamer Hive: a gamescope session that boots straight into Steam Big Picture.
+# Pick "Gamer Hive" at the greeter, or run `zorp-gamer-hive` from a TTY.
+# Leave with Steam > Power > "Switch to Desktop" (or Ctrl+Alt+F3 for a text console).
+# Per-user overrides: ~/.config/zorpos/gamer-hive.env (e.g. ZORP_GS_EXTRA="-W 2560 -H 1440 -r 144")
+set -u
+if [[ $EUID -eq 0 ]]; then echo "Steam will not run as root. Log in as your normal user."; exit 1; fi
+command -v gamescope >/dev/null || { echo "gamescope is not installed"; exit 1; }
+
+state="${XDG_RUNTIME_DIR:-/tmp}/zorp-gamer-hive"; mkdir -p "$state"; rm -f "$state/leave"
+export ZORP_SESSION=gamer-hive
+export XDG_CURRENT_DESKTOP=gamescope
+# Steam client feature flags understood by the gamepad UI inside gamescope
+export STEAM_USE_MANGOAPP=1 STEAM_MANGOAPP_PRESETS_SUPPORTED=1 STEAM_MANGOAPP_HORIZONTAL_SUPPORTED=1
+export STEAM_MULTIPLE_XWAYLANDS=1 STEAM_GAMESCOPE_VRR_SUPPORTED=1 STEAM_GAMESCOPE_HAS_TEARING_SUPPORT=1
+export STEAM_GAMESCOPE_TEARING_SUPPORTED=1 STEAM_USE_DYNAMIC_VRS=1 STEAM_ENABLE_VOLUME_HANDLER=1
+export STEAM_DISABLE_AUDIO_DEVICE_SWITCHING=1 SRT_URLOPEN_PREFER_STEAM=1
+export ENABLE_GAMESCOPE_WSI=1 vk_xwayland_wait_ready=false
+
+ZORP_GS_EXTRA=""
+# shellcheck source=/dev/null
+[[ -f ${XDG_CONFIG_HOME:-$HOME/.config}/zorpos/gamer-hive.env ]] && . "${XDG_CONFIG_HOME:-$HOME/.config}/zorpos/gamer-hive.env"
+
+# shellcheck disable=SC2206
+gs_args=(--steam -e -f --mangoapp --xwayland-count 2 $ZORP_GS_EXTRA)
+
+crashes=0; window_start=$SECONDS
+while :; do
+  started=$SECONDS
+  gamescope "${gs_args[@]}" -- zorp-steam -gamepadui -steamos3
+  rc=$?
+  [[ -f $state/leave ]] && { echo "Gamer Hive: undocked ($(cat "$state/leave"))."; exit 0; }
+  # crash-loop guard: 3 quick deaths inside 2 minutes -> stop and say why, never spin forever
+  if (( SECONDS - started < 30 )); then
+    (( SECONDS - window_start > 120 )) && { crashes=0; window_start=$SECONDS; }
+    (( ++crashes >= 3 )) && {
+      echo "Gamer Hive: gamescope/Steam exited $crashes times quickly (last code $rc)."
+      echo "Try: zorp-gaming-doctor   |   logs: journalctl --user -b"
+      exit 1; }
+  fi
+  sleep 2
+done

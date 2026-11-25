@@ -1,0 +1,4 @@
+#!/bin/sh
+# Steam OS-branch hook. ZorpOS has one branch; updates come from pacman.
+case "$1" in -c|-l) echo stable ;; esac
+exit 0

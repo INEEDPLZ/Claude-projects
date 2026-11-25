@@ -1,0 +1,40 @@
+# Maintainer: ZorpOS Mothership Collective
+# Install & manage Proton-GE / Wine-GE / Luxtorpeda. Packaged from the upstream AppImage,
+# unpacked at build time so it runs without FUSE.
+pkgname=protonup-qt-bin
+_app=ProtonUp-Qt
+pkgver=2.16.0
+pkgrel=1
+pkgdesc="Install and manage Proton-GE and other compatibility tools"
+arch=(x86_64)
+url="https://github.com/DavidoTek/ProtonUp-Qt"
+license=(GPL-3.0-only)
+depends=(glibc zlib)
+provides=(protonup-qt)
+conflicts=(protonup-qt)
+options=(!strip !debug)
+source=("${_app}-${pkgver}.AppImage::${url}/releases/download/v${pkgver}/${_app}-${pkgver}-x86_64.AppImage")
+noextract=("${_app}-${pkgver}.AppImage")
+sha256sums=('862a717502f0b9601f23e849a4b4dfe3d69aed7e7ca262cf1bdc4a553f8de7ec')
+
+prepare() {
+  chmod +x "${_app}-${pkgver}.AppImage"
+  rm -rf squashfs-root
+  "./${_app}-${pkgver}.AppImage" --appimage-extract >/dev/null
+}
+
+package() {
+  install -d "$pkgdir/opt/protonup-qt"
+  cp -a squashfs-root/. "$pkgdir/opt/protonup-qt/"
+  chmod -R u+rwX,go+rX,go-w "$pkgdir/opt/protonup-qt"
+  install -Dm755 /dev/stdin "$pkgdir/usr/bin/protonup-qt" <<'SH'
+#!/bin/sh
+exec /opt/protonup-qt/AppRun "$@"
+SH
+  local desktop icon
+  desktop=$(find squashfs-root -maxdepth 1 -name '*.desktop' | head -1)
+  sed 's|^Exec=.*|Exec=protonup-qt|' "$desktop" > protonup-qt.desktop
+  install -Dm644 protonup-qt.desktop "$pkgdir/usr/share/applications/net.davidotek.pupgui2.desktop"
+  icon=$(find squashfs-root -maxdepth 1 -name '*.png' -o -maxdepth 1 -name '*.svg' | head -1)
+  [[ -n $icon ]] && install -Dm644 "$icon" "$pkgdir/usr/share/pixmaps/$(basename "$(grep -m1 '^Icon=' protonup-qt.desktop | cut -d= -f2)").${icon##*.}"
+}

@@ -1,0 +1,4 @@
+#!/bin/sh
+# Steam's "check for OS updates" hook. ZorpOS updates through pacman, so: nothing here.
+# Exit code 7 tells Steam "no update available".
+exit 7

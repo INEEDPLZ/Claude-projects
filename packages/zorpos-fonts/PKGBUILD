@@ -1,0 +1,27 @@
+# Maintainer: ZorpOS Mothership Collective
+# Doto (dot-matrix, used for LCD readouts + MangoHud) and Comfortaa (rounded body text).
+# Both SIL OFL 1.1, fetched from the google/fonts repo at a pinned commit.
+pkgname=zorpos-fonts
+pkgver=20261125
+pkgrel=1
+pkgdesc="ZorpOS fonts: Doto (dot-matrix LCD) and Comfortaa (rounded sans), SIL OFL"
+arch=(any)
+url="https://github.com/google/fonts"
+license=(OFL-1.1)
+_commit=83c62e30d87daa70216dab6b984d00d20d96d585
+_gf="https://raw.githubusercontent.com/google/fonts/${_commit}/ofl"
+source=("Doto.ttf::${_gf}/doto/Doto%5BROND,wght%5D.ttf"
+        "Doto-OFL.txt::${_gf}/doto/OFL.txt"
+        "Comfortaa.ttf::${_gf}/comfortaa/Comfortaa%5Bwght%5D.ttf"
+        "Comfortaa-OFL.txt::${_gf}/comfortaa/OFL.txt")
+sha256sums=('6f4fe7d37853b91df3698daa84cde2dbe1c9695d88c986e6510134910337d426'
+            '26a7b58bdba6cda8a78ca6e8b3791d8013b8abc6d5e6519f84193893aee02020'
+            '0fc3f45dc48b614db9c39181502544b37217ecbf8bee2fb35886992bc96c5bd3'
+            'bc85bae0b512b799bbfb2b916e4d0a34cfd963d09778cd783e248b479e67760a')
+
+package() {
+  install -Dm644 Doto.ttf      "$pkgdir/usr/share/fonts/zorpos/Doto[ROND,wght].ttf"
+  install -Dm644 Comfortaa.ttf "$pkgdir/usr/share/fonts/zorpos/Comfortaa[wght].ttf"
+  install -Dm644 Doto-OFL.txt      "$pkgdir/usr/share/licenses/$pkgname/Doto-OFL.txt"
+  install -Dm644 Comfortaa-OFL.txt "$pkgdir/usr/share/licenses/$pkgname/Comfortaa-OFL.txt"
+}

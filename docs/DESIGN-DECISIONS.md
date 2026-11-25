@@ -34,14 +34,30 @@ only verifies these and does not override them, so we don't fight upstream.
 
 ## 6. `steam-devices`
 That's a Debian/Fedora package name. On Arch the udev rules come with the `steam` package
-itself, and `game-devices-udev` (AUR) covers third-party pads.
+itself, and `game-devices-udev` (our upstream build) covers third-party pads.
 
-## 7. Calamares & other AUR-only packages
-The ISO can't pull from the AUR at boot. Phase 2+ builds every AUR dependency into a local
-signed pacman repo `[zorpos]` that ships on the ISO and on a hosted mirror.
-Each package is listed with its justification in [AUR.md](AUR.md).
+## 7. No AUR at all
+The ISO can't pull from the AUR, and AUR PKGBUILDs can change under us. Every non-official package
+gets its own PKGBUILD in `packages/`, built from upstream at a pinned version into the `[zorpos]` repo.
+`protontricks`, `wine-staging` and `nvidia-open-dkms` turned out to be official already.
+Details: [AUR.md](AUR.md).
 
 ## 8. UEFI boot menu shows no image
 systemd-boot (used for UEFI on the ISO) is text-only. The mascot appears on the BIOS menu
 splash now, and on both paths through Plymouth once Phase 5 lands. That's also where a
 Windows-style boot logo really lives: after the bootloader, not in it.
+
+## 9. "Themed first-run Steam login"
+Steam's login and UI are Valve's client and can't be skinned in a supported way. Patching it breaks
+on every Steam update. **Alternative:** ZorpOS themes what it owns: a full-screen "Docking with
+Steam…" splash (original mascot + Doto dot-matrix type) that covers Steam's startup and hands off
+when the client is up. Earthling Mode turns it into plain "Starting Steam…".
+
+## 10. Gamer Hive instead of `gamescope-session-steam`
+The common AUR session pulls in a whole -git stack. Ours is about 60 lines of bash plus three SteamOS stubs,
+with a crash-loop guard so a broken GPU driver drops you to a TTY with advice instead of a black
+screen loop.
+
+## 11. Live ISO user
+Steam refuses to run as root, so tty1 now auto-logs in as `specimen` (passwordless sudo, live only).
+Root still has tty2–6.

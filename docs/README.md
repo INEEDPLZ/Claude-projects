@@ -3,8 +3,8 @@
 An Arch Linux–based distro that crash-landed from another planet. Its builders copied
 Earth's mid-2000s "glossy future" design and got it slightly wrong. Arch underneath, alien on top.
 
-> **Status: Phase 1 of 6.** This is a bootable, branded live ISO with a TTY base system.
-> The Hive desktop, gaming stack, Xenoscribe, theming and installer arrive in later phases
+> **Status: Phase 2 of 6.** This is a bootable, branded live ISO with a TTY base system and the full
+> gaming stack ([GAMING.md](GAMING.md)). The Hive desktop, Xenoscribe, theming and installer arrive in later phases
 > (see [ROADMAP.md](ROADMAP.md)).
 
 ## Repo layout
@@ -12,7 +12,7 @@ Earth's mid-2000s "glossy future" design and got it slightly wrong. Arch underne
 | Path | What |
 |---|---|
 | `archiso/` | archiso profile (based on the official `releng` profile) |
-| `packages/` | PKGBUILDs for ZorpOS-owned packages (Phase 2+) |
+| `packages/` | PKGBUILDs built into the local `[zorpos]` repo (see [AUR.md](AUR.md)) |
 | `shell/` | The Hive desktop shell (Phase 3) |
 | `apps/` | Xenoscribe and other first-party apps (Phase 4) |
 | `themes/tokens.json` | **the only place theme colors are defined** |
@@ -38,7 +38,8 @@ sudo make iso-fast     # zstd squashfs, much faster, slightly bigger: for dev it
 Force one with `ZORP_BUILDER=chroot`. Use a different mirror with `ZORP_MIRROR=https://…`.
 If you are behind a TLS-inspecting proxy, set `ZORP_EXTRA_CA=/path/ca.crt`.
 
-Native build dependencies: `archiso librsvg python`. To test: `qemu-desktop edk2-ovmf`.
+Native build dependencies: `archiso librsvg python base-devel git pacman-contrib`.
+`make iso` first builds `packages/` into `build/repo/` (`[zorpos]`), then the ISO. To test: `qemu-desktop edk2-ovmf`.
 
 ## Testing
 
@@ -48,7 +49,8 @@ make run-vm            # interactive QEMU window, UEFI
 ISO=path/to.iso make test-vm-uefi
 ```
 
-The smoke test passes when the live system reaches `mothership login:` on the serial console.
+The smoke test passes when the live system reaches `mothership login:` on the serial console **and**
+`zorp-gaming-doctor` reports no failures (it logs in as root over serial; `PROBE=0` skips this).
 It uses KVM if `/dev/kvm` is writable and falls back to TCG otherwise (slow: allow ~10 min).
 
 ## Boot menu
@@ -59,6 +61,11 @@ It uses KVM if `/dev/kvm` is writable and falls back to TCG otherwise (slow: all
 | ZorpOS ~ LTS kernel, safe graphics | linux-lts + `nomodeset` | known-good fallback; forces Earthling Mode |
 | ZorpOS ~ with speech | linux-zen + speakup | screen reader; forces Earthling Mode |
 | Memtest86+ | n/a | RAM test |
+
+## Live session
+
+tty1 auto-logs in as **`specimen`** (no password, passwordless sudo, live ISO only). Steam refuses to run as
+root. Root can log in on tty2–6 with an empty password. Run `zorp-gamer-hive` to boot into Steam Big Picture.
 
 ## Escaping the weirdness (and recovery)
 

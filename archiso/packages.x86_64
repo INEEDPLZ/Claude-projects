@@ -50,12 +50,16 @@ kmscon-terminfo
 ldns
 less
 lftp
+lib32-vulkan-intel
+lib32-vulkan-radeon
 libfido2
 libusb-compat
 linux-firmware
 linux-firmware-marvell
 linux-lts
+linux-lts-headers
 linux-zen
+linux-zen-headers
 livecd-sounds
 lsscsi
 lvm2
@@ -97,6 +101,7 @@ pipewire
 pipewire-alsa
 pipewire-jack
 pipewire-pulse
+polkit
 ppp
 pptpclient
 pv
@@ -129,6 +134,8 @@ usbutils
 vim
 virtualbox-guest-utils-nox
 vpnc
+vulkan-intel
+vulkan-radeon
 wget
 wireless-regdb
 wireless_tools
@@ -139,4 +146,5 @@ xdg-utils
 xfsprogs
 xl2tpd
 zip
+zorpos-gaming
 zsh

@@ -35,10 +35,16 @@ if [[ ${INTERACTIVE:-0} == 1 ]]; then
 fi
 
 MON="$T/mon.sock"
-qemu-system-x86_64 "${common[@]}" -display none -serial "file:$T/serial.log" \
+SER="$T/serial.sock"
+qemu-system-x86_64 "${common[@]}" -display none \
+  -chardev "socket,id=ser0,path=$SER,server=on,wait=off,logfile=$T/serial.log" -serial chardev:ser0 \
   -monitor "unix:$MON,server,nowait" &
 QPID=$!
 trap 'kill $QPID 2>/dev/null || true' EXIT
+# type into the serial console (login + probe commands)
+say() { python3 -c '
+import socket,sys,time; s=socket.socket(socket.AF_UNIX); s.connect(sys.argv[1])
+for line in sys.argv[2:]: s.sendall(line.encode()+b"\r"); time.sleep(1.5)' "$SER" "$@" 2>/dev/null || true; }
 shot() { sleep 0.3; printf 'screendump %s\n' "$1" | python3 -c '
 import socket,sys; s=socket.socket(socket.AF_UNIX); s.connect(sys.argv[1]); s.sendall(sys.stdin.buffer.read()); s.recv(4096)' "$MON" 2>/dev/null || true; }
 
@@ -54,10 +60,23 @@ while (( SECONDS - start < TIMEOUT )); do
 done
 sleep 8; shot "$T/02-console.ppm"
 
-echo "---- serial tail ($MODE) ----"; tail -n 25 "$T/serial.log" | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g'
-if (( ok )); then
+# probe: log in as root on serial and run the stack checks (PROBE=0 to skip)
+probe_ok=1
+if (( ok )) && [[ ${PROBE:-1} == 1 ]]; then
+  say root "" "stty cols 200; clear"
+  say "echo ZORP-PROBE-BEGIN; zorp-gaming-doctor; echo DOCTOR_RC=\$?; dkms status; systemctl --failed --no-legend --plain; echo ZORP-PROBE-END"
+  for _ in $(seq 1 60); do grep -q "^ZORP-PROBE-END" "$T/serial.log" && break; sleep 5; done
+  sed -n '/^ZORP-PROBE-BEGIN/,/^ZORP-PROBE-END/p' "$T/serial.log" | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g; s/\r//g' > "$T/probe.txt"
+  echo "---- probe ($MODE) ----"; cat "$T/probe.txt"
+  grep -q "DOCTOR_RC=0" "$T/probe.txt" || probe_ok=0
+fi
+
+if (( ok && probe_ok )); then
   echo "PASS [$MODE]: reached login prompt in $((SECONDS - start + ${MENU_WAIT:-6}))s"
   grep -E "Failed to start|FAILED" "$T/serial.log" | sed 's/\x1b\[[0-9;]*m//g' | sort -u | sed 's/^/  warn: /' || true
+elif (( ok )); then
+  echo "FAIL [$MODE]: booted, but zorp-gaming-doctor reported failures (see $T/probe.txt)"; exit 1
 else
+  echo "---- serial tail ($MODE) ----"; tail -n 25 "$T/serial.log" | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g'
   echo "FAIL [$MODE]: no login prompt within ${TIMEOUT}s"; exit 1
 fi

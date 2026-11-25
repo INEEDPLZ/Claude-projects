@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Called by Steam's "Switch to Desktop". In ZorpOS that means: leave the Gamer Hive.
+target="${1:-desktop}"
+[[ $target == gamescope ]] && exit 0
+state="${XDG_RUNTIME_DIR:-/tmp}/zorp-gamer-hive"; mkdir -p "$state"
+echo "$target" > "$state/leave"
+steam -shutdown >/dev/null 2>&1 &

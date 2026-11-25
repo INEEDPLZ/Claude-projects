@@ -31,11 +31,12 @@ install -Dm644 "$GEN/aurora.svg"                       "$OUT/airootfs/usr/share/
 install -Dm644 "$GEN/tokens.css"                       "$OUT/airootfs/usr/share/zorpos/tokens.css"
 install -Dm644 "$ROOT/themes/tokens.json"              "$OUT/airootfs/usr/share/zorpos/tokens.json"
 
-# placeholders: @ZORP_VT@ -> console palette, @NAME@ -> RRGGBB from tokens
+# placeholders: @ZORP_VT@ -> console palette, @ZORP_REPO@ -> local [zorpos] repo, @NAME@ -> RRGGBB from tokens
+[[ -f ${ZORP_REPO:-$ROOT/build/repo}/zorpos.db ]] || { echo "error: [zorpos] repo missing; run scripts/build-packages.sh" >&2; exit 1; }
 VT="$(cat "$GEN/vt-params")"
 mapfile -t files < <(grep -rlE '@[A-Z_]+@' "$OUT" --include='*.cfg' --include='*.conf' || true)
 for f in "${files[@]}"; do
-  sed -i "s|@ZORP_VT@|$VT|g" "$f"
+  sed -i "s|@ZORP_VT@|$VT|g; s|@ZORP_REPO@|${ZORP_REPO:-$ROOT/build/repo}|g" "$f"
   while IFS='=' read -r k v; do
     [[ $k == ZORP_* && $k != ZORP_FONT_* ]] || continue
     name="${k#ZORP_}"; hex="${v//\'/}"; hex="${hex#\#}"

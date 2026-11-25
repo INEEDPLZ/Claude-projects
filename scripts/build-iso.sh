@@ -19,14 +19,16 @@ fi
 echo ">> builder: $BUILDER"
 
 inner='set -e; cd /zorp
-  pacman -Sy --noconfirm --needed archiso librsvg python >/dev/null
-  scripts/prepare-profile.sh /zorp/build/profile
+  pacman -Sy --noconfirm --needed archiso librsvg python base-devel git pacman-contrib >/dev/null
+  scripts/build-packages.sh
+  ZORP_REPO=/zorp/build/repo scripts/prepare-profile.sh /zorp/build/profile
   rm -rf /zorp/build/work
   mkarchiso -v -r -w /zorp/build/work -o /zorp/out /zorp/build/profile'
 
 case $BUILDER in
   native)
-    "$ROOT/scripts/prepare-profile.sh" "$ROOT/build/profile"
+    "$ROOT/scripts/build-packages.sh"
+    ZORP_REPO="$ROOT/build/repo" "$ROOT/scripts/prepare-profile.sh" "$ROOT/build/profile"
     rm -rf "$WORK"
     mkarchiso -v -r -w "$WORK" -o "$OUT" "$ROOT/build/profile" ;;
   podman|docker)
@@ -44,13 +46,17 @@ case $BUILDER in
       # trust an extra CA if this host sits behind a TLS-inspecting proxy
       [[ -n ${ZORP_EXTRA_CA:-} ]] && cp "$ZORP_EXTRA_CA" "$AR/etc/ca-certificates/trust-source/anchors/extra.crt"
     fi
-    cleanup() { umount -R "$AR/zorp" "$AR/proc" "$AR/sys" "$AR/dev" "$AR" 2>/dev/null || true; }
+    cleanup() { umount -R "$AR/zorp" 2>/dev/null || true; }
     trap cleanup EXIT
     mountpoint -q "$AR" || mount --bind "$AR" "$AR"
-    mount -t proc proc "$AR/proc"; mount --rbind /sys "$AR/sys"; mount --rbind /dev "$AR/dev"
-    mkdir -p "$AR/zorp"; mount --bind "$ROOT" "$AR/zorp"
+    mountpoint -q "$AR/proc" || mount -t proc proc "$AR/proc"
+    mountpoint -q "$AR/sys"  || mount --rbind /sys "$AR/sys"
+    mountpoint -q "$AR/dev"  || mount --rbind /dev "$AR/dev"
+    mkdir -p "$AR/zorp"; mountpoint -q "$AR/zorp" || mount --bind "$ROOT" "$AR/zorp"
     env_pass=$(env | grep -iE '^(https?|no)_proxy=' | sed "s/^/export /;s/=/='/;s/$/'/" || true)
-    chroot "$AR" /bin/bash -c "$env_pass
+    # clean environment: host CA/tool variables point at paths that don't exist in the chroot
+    chroot "$AR" /usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/bin HOME=/root TERM="${TERM:-xterm}" \
+      /bin/bash -c "$env_pass
       export ZORP_FAST='${ZORP_FAST:-0}'
       update-ca-trust
       [[ -d /etc/pacman.d/gnupg ]] || { pacman-key --init; pacman-key --populate archlinux; } >/dev/null

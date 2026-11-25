@@ -1,0 +1,38 @@
+# Maintainer: ZorpOS Mothership Collective
+# Metapackage + config for the ZorpOS gaming stack (SteamOS-style compatibility).
+pkgname=zorpos-gaming
+pkgver=0.2.0
+pkgrel=1
+pkgdesc="ZorpOS gaming stack: Steam, Proton tooling, gamescope, gamemode, MangoHud vitals, drivers, controllers"
+arch=(any)
+url="https://github.com/ineedplz/claude-projects"
+license=(GPL-3.0-or-later)
+depends=(
+  # Steam + Windows compatibility
+  steam wine-staging winetricks protontricks protonup-qt-bin
+  lib32-gnutls lib32-libpulse lib32-alsa-plugins lib32-pipewire lib32-systemd
+  # performance + overlays
+  gamescope gamemode lib32-gamemode mangohud lib32-mangohud vkbasalt
+  # Vulkan / 32-bit graphics (NVIDIA is added per-machine by zorp-gpu-setup)
+  mesa lib32-mesa vulkan-icd-loader lib32-vulkan-icd-loader vulkan-tools
+  # controllers
+  game-devices-udev xpadneo-dkms bluez bluez-utils
+  # session + branding
+  zorpos-gamer-hive zorpos-fonts
+  # tools used by the scripts
+  pciutils dkms
+)
+optdepends=('nvidia-open-dkms: NVIDIA Turing+ (installed by zorp-gpu-setup)'
+            'vulkan-radeon: AMD Vulkan' 'vulkan-intel: Intel Vulkan')
+backup=(etc/MangoHud.conf etc/vkBasalt.conf)
+source=(MangoHud.conf vkBasalt.conf 70-zorpos-gaming.conf zorpos-gaming-modules.conf
+        zorp-gaming-doctor zorp-gpu-setup)
+sha256sums=(SKIP SKIP SKIP SKIP SKIP SKIP)
+
+package() {
+  install -Dm644 MangoHud.conf "$pkgdir/etc/MangoHud.conf"
+  install -Dm644 vkBasalt.conf "$pkgdir/etc/vkBasalt.conf"
+  install -Dm644 70-zorpos-gaming.conf "$pkgdir/usr/lib/sysctl.d/70-zorpos-gaming.conf"
+  install -Dm644 zorpos-gaming-modules.conf "$pkgdir/usr/lib/modules-load.d/zorpos-gaming.conf"
+  install -Dm755 -t "$pkgdir/usr/bin" zorp-gaming-doctor zorp-gpu-setup
+}

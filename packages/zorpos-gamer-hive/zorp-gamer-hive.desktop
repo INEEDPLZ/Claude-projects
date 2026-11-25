@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Gamer Hive
+Comment=Boot straight into Steam Big Picture inside gamescope
+Exec=/usr/bin/zorp-gamer-hive
+Type=Application
+DesktopNames=gamescope

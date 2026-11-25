@@ -1,0 +1,25 @@
+# Maintainer: ZorpOS Mothership Collective
+# Vulkan post-processing layer (CAS sharpening, SMAA, ...). Dormant unless ENABLE_VKBASALT=1.
+pkgname=vkbasalt
+pkgver=0.3.2.10
+pkgrel=1
+pkgdesc="Vulkan post-processing layer (opt-in via ENABLE_VKBASALT=1)"
+arch=(x86_64)
+url="https://github.com/DadSchoorse/vkBasalt"
+license=(Zlib)
+options=(!debug)
+depends=(gcc-libs glibc libx11)
+makedepends=(git meson ninja glslang spirv-headers vulkan-headers)
+source=("git+${url}.git#tag=v${pkgver}")
+sha256sums=(SKIP)
+
+build() {
+  arch-meson vkBasalt build
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "$pkgdir"
+  install -Dm644 vkBasalt/config/vkBasalt.conf "$pkgdir/usr/share/vkBasalt/vkBasalt.conf.example"
+  install -Dm644 vkBasalt/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

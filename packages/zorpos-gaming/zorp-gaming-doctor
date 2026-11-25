@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Health check for the ZorpOS gaming stack. Plain English, always. Exit 1 if anything FAILs.
+pass=0 warn=0 fail=0
+ok()   { printf '  \e[32mPASS\e[0m  %s\n' "$*"; pass=$((pass+1)); }
+meh()  { printf '  \e[33mWARN\e[0m  %s\n' "$*"; warn=$((warn+1)); }
+bad()  { printf '  \e[31mFAIL\e[0m  %s\n' "$*"; fail=$((fail+1)); }
+has()  { pacman -Qq "$1" &>/dev/null; }
+echo "ZorpOS gaming doctor"
+
+grep -q '^\[multilib\]' /etc/pacman.conf && ok "multilib repo enabled" || bad "multilib repo not enabled in /etc/pacman.conf"
+for p in steam gamescope gamemode lib32-gamemode mangohud lib32-mangohud wine-staging winetricks protontricks \
+         protonup-qt-bin vkbasalt game-devices-udev xpadneo-dkms zorpos-gamer-hive; do
+  has "$p" && ok "$p installed" || bad "$p missing"
+done
+
+shopt -s nullglob
+icd64=(/usr/share/vulkan/icd.d/*x86_64*.json /usr/share/vulkan/icd.d/nvidia_icd.json)
+icd32=(/usr/share/vulkan/icd.d/*i686*.json /usr/share/vulkan/icd.d/*i386*.json)
+(( ${#icd64[@]} )) && ok "64-bit Vulkan drivers: $(basename -a "${icd64[@]}" | tr '\n' ' ')" || bad "no 64-bit Vulkan driver"
+(( ${#icd32[@]} )) || has lib32-nvidia-utils && ok "32-bit Vulkan drivers present" || bad "no 32-bit Vulkan driver (lib32-vulkan-* / lib32-nvidia-utils)"
+if command -v vulkaninfo >/dev/null; then
+  gpus=$(vulkaninfo --summary 2>/dev/null | awk -F'= ' '/deviceName/{print $2}' | paste -sd, -)
+  [[ -n $gpus ]] && ok "Vulkan devices: $gpus" || meh "vulkaninfo found no devices (normal in a VM without 3D)"
+fi
+
+mmc=$(sysctl -n vm.max_map_count); (( mmc >= 1048576 )) && ok "vm.max_map_count = $mmc" || bad "vm.max_map_count = $mmc (want >= 1048576)"
+[[ $(sysctl -n kernel.split_lock_mitigate 2>/dev/null) == 0 ]] && ok "split-lock mitigation off" || meh "split-lock mitigation on (or unsupported CPU)"
+nofile=$(ulimit -Hn); [[ $nofile == unlimited ]] || (( nofile >= 524288 )) && ok "open-file hard limit $nofile (esync OK)" || bad "open-file hard limit $nofile (esync wants >= 524288)"
+[[ -e /proc/self/fd ]] && grep -q futex_waitv /proc/kallsyms 2>/dev/null && ok "futex_waitv in kernel (fsync OK)" || meh "could not confirm futex_waitv (fsync)"
+lsmod | grep -q '^uinput' && ok "uinput loaded (Steam Input virtual pads)" || meh "uinput not loaded"
+for k in /usr/lib/modules/*/; do
+  kv=$(basename "$k"); [[ -d $k/build ]] || continue
+  dkms status -m hid-xpadneo -k "$kv" 2>/dev/null | grep -q installed && ok "xpadneo built for $kv" || bad "xpadneo not built for $kv"
+done
+[[ -f /usr/lib/udev/rules.d/60-steam-input.rules || -f /usr/lib/udev/rules.d/70-steam-input.rules ]] && ok "Steam controller udev rules" || meh "Steam udev rules not found"
+systemctl is-enabled bluetooth.service &>/dev/null && ok "bluetooth enabled" || meh "bluetooth.service not enabled"
+[[ -f /usr/share/wayland-sessions/zorp-gamer-hive.desktop ]] && ok "Gamer Hive session registered" || bad "Gamer Hive session missing"
+[[ $EUID -eq 0 ]] && meh "running as root: Steam itself refuses root, use your normal user"
+
+echo "  -> $pass pass, $warn warn, $fail fail"
+(( fail == 0 ))

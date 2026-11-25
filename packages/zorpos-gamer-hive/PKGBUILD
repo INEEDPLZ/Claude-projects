@@ -1,0 +1,24 @@
+# Maintainer: ZorpOS Mothership Collective
+# "Gamer Hive": gamescope session straight into Steam Big Picture, SteamOS helper stubs,
+# and the zorp-steam wrapper ("Docking with Steam..." splash + first-run tuning).
+pkgname=zorpos-gamer-hive
+pkgver=0.2.0
+pkgrel=1
+pkgdesc="ZorpOS Gamer Hive: gamescope + Steam Big Picture session"
+arch=(any)
+url="https://github.com/ineedplz/claude-projects"
+license=(GPL-3.0-or-later)
+depends=(gamescope steam mangohud bash procps-ng python-gobject gtk4 librsvg zorpos-fonts)
+provides=(steamos-session-select)
+conflicts=(gamescope-session-steam gamescope-session-steam-git)
+source=(zorp-gamer-hive zorp-steam steamos-session-select steamos-update steamos-select-branch
+        docking-splash.py zorp-gamer-hive.desktop zorp-steam.desktop)
+sha256sums=(SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP)
+
+package() {
+  install -Dm755 -t "$pkgdir/usr/bin" zorp-gamer-hive zorp-steam \
+    steamos-session-select steamos-update steamos-select-branch
+  install -Dm755 docking-splash.py "$pkgdir/usr/lib/zorpos/docking-splash"
+  install -Dm644 zorp-gamer-hive.desktop "$pkgdir/usr/share/wayland-sessions/zorp-gamer-hive.desktop"
+  install -Dm644 zorp-steam.desktop "$pkgdir/usr/share/applications/zorp-steam.desktop"
+}

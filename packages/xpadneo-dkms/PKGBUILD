@@ -1,0 +1,31 @@
+# Maintainer: ZorpOS Mothership Collective
+# Advanced Linux driver for Xbox wireless controllers over Bluetooth (DKMS).
+pkgname=xpadneo-dkms
+_name=hid-xpadneo
+pkgver=0.10.5
+pkgrel=1
+pkgdesc="Xbox One / Series wireless controller driver over Bluetooth (DKMS)"
+arch=(any)
+url="https://github.com/atar-axis/xpadneo"
+license=(GPL-3.0-only)
+depends=(dkms bluez bluez-utils)
+optdepends=('linux-zen-headers: build for linux-zen' 'linux-lts-headers: build for linux-lts')
+makedepends=(git)
+provides=(xpadneo)
+conflicts=(xpadneo xpadneo-dkms-git)
+source=("git+${url}.git#tag=v${pkgver}")
+sha256sums=(SKIP)
+
+package() {
+  cd xpadneo
+  local dest="$pkgdir/usr/src/${_name}-${pkgver}"
+  install -d "$dest"
+  cp -r hid-xpadneo/src "$dest/src"
+  install -m644 hid-xpadneo/Makefile "$dest/Makefile"
+  sed "s/@DO_NOT_CHANGE@/${pkgver}/" hid-xpadneo/dkms.conf.in > "$dest/dkms.conf"
+  # upstream's post-install hooks only delete a legacy file outside the package; drop them
+  sed -i '/^POST_INSTALL=/d; /^POST_REMOVE=/d' "$dest/dkms.conf"
+  install -Dm644 hid-xpadneo/etc-modprobe.d/xpadneo.conf "$pkgdir/usr/lib/modprobe.d/xpadneo.conf"
+  install -Dm644 -t "$pkgdir/usr/lib/udev/rules.d" hid-xpadneo/etc-udev-rules.d/*.rules
+  install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE.md"
+}
