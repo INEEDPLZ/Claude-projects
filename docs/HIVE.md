@@ -92,3 +92,10 @@ Hyprland --verify-config -c shell/hypr/hyprland.lua
 
 The shell also runs under headless sway (that's how its screenshots are tested). Without Hyprland,
 IPC calls fail soft and jars and planets go quiet.
+
+## Virtual machines
+
+The Hive runs in VMs without 3D acceleration: Hyprland uses software GL, and this is tested in QEMU
+for both BIOS and UEFI. On those machines (virtio-gpu, QXL, VMware SVGA, bochs, simpledrm) the login
+script sets `GSK_RENDERER=cairo`, because GTK4's GPU renderers draw blank text on software GL.
+Real GPUs keep GTK's default renderer. Set `GSK_RENDERER` yourself to override.
