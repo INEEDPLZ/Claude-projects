@@ -21,7 +21,7 @@ Both paths run the same back end, `zorp-install-target`, after copying the live 
 | Step | Detail |
 |---|---|
 | Kernels | linux-zen (default) and linux-lts copied from the boot medium |
-| Initramfs | standard mkinitcpio presets (default + fallback) with the Plymouth hook (landing-UFO splash) |
+| Initramfs | mkinitcpio with the Plymouth hook (landing-UFO splash); zen: default image, LTS: default + fallback (used by the rescue entry) |
 | Live cleanup | removes the `specimen` live user, live autologin, root-login SSH config, VM guest services, archiso units and hooks |
 | Login | greetd with the alien-eye greeter (no autologin) |
 | Packages | pacman keyring initialized; the mirror is set |

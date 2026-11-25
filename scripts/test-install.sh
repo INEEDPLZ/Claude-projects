@@ -3,17 +3,23 @@
 # Passes when the installed system boots to a login prompt, greetd (the eye greeter) is running, live-only
 # bits are gone, and zorp-gaming-doctor has no failures. Screenshots + logs in out/test/install/.
 # Env: ISO=path  MEM=4096  INSTALL_TIMEOUT=5400  BOOT_TIMEOUT=1200
+#      SKIP_INSTALL=1  reuse the disk + NVRAM from the previous run and only do stage 2
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ISO="${ISO:-$(ls -t "$ROOT"/out/zorpos-*.iso | head -1)}"
-T="$ROOT/out/test/install"; mkdir -p "$T"; rm -f "$T"/*
-DISK="$T/disk.qcow2"; qemu-img create -q -f qcow2 "$DISK" 24G
+T="$ROOT/out/test/install"; mkdir -p "$T"; DISK="$T/disk.qcow2"
 for c in /usr/share/edk2/x64/OVMF_CODE.4m.fd /usr/share/OVMF/OVMF_CODE_4M.fd; do [[ -f $c ]] && CODE=$c && break; done
-for v in /usr/share/edk2/x64/OVMF_VARS.4m.fd /usr/share/OVMF/OVMF_VARS_4M.fd; do [[ -f $v ]] && cp "$v" "$T/vars.fd" && break; done
+if [[ ${SKIP_INSTALL:-0} == 1 ]]; then
+  [[ -f $DISK && -f $T/vars.fd ]] || { echo "SKIP_INSTALL=1 but no previous disk in $T"; exit 1; }
+  rm -f "$T"/installed-* "$T"/probe.txt
+else
+  rm -f "$T"/*; qemu-img create -q -f qcow2 "$DISK" 24G
+  for v in /usr/share/edk2/x64/OVMF_VARS.4m.fd /usr/share/OVMF/OVMF_VARS_4M.fd; do [[ -f $v ]] && cp "$v" "$T/vars.fd" && break; done
+fi
 accel=(-accel tcg,thread=multi -cpu max); [[ -w /dev/kvm ]] && accel=(-accel kvm -cpu host)
 base=(-m "${MEM:-4096}" -smp "$(nproc)" "${accel[@]}" -device virtio-vga -nic user,model=virtio-net-pci
       -drive "if=pflash,format=raw,readonly=on,file=$CODE" -drive "if=pflash,format=raw,file=$T/vars.fd"
-      -drive "file=$DISK,if=virtio,format=qcow2" -display none)
+      -drive "file=$DISK,if=none,id=hd,format=qcow2" -display none)
 
 run_vm() { # stage extra-args...
   local stage=$1; shift
@@ -39,8 +45,10 @@ wait_for() { # pattern timeout
 stop_vm() { kill $QPID 2>/dev/null || true; wait $QPID 2>/dev/null || true; }
 trap stop_vm EXIT
 
+if [[ ${SKIP_INSTALL:-0} != 1 ]]; then
 echo ">> stage 1: live ISO, installing to the virtual disk"
-run_vm live -drive "file=$ISO,media=cdrom,readonly=on,if=none,id=cd" -device ide-cd,drive=cd,bootindex=0
+run_vm live -drive "file=$ISO,media=cdrom,readonly=on,if=none,id=cd" -device ide-cd,drive=cd,bootindex=0 \
+  -device virtio-blk-pci,drive=hd,bootindex=1
 wait_for "mothership login:" "${BOOT_TIMEOUT:-1200}" || { echo "FAIL: live ISO didn't boot"; exit 1; }
 say root "" "stty cols 200"
 say "zorp-install-cli --disk /dev/vda --user tester --password zorp --serial-console --yes-wipe-disk; echo INSTALL_RC=\$?"
@@ -48,9 +56,11 @@ if ! wait_for "^INSTALL_RC=" "${INSTALL_TIMEOUT:-5400}"; then echo "FAIL: instal
 grep -aq "^INSTALL_RC=0" "$LOG" || { echo "FAIL: installer error"; grep -a "abduction\|rror" "$LOG" | tail -30; exit 1; }
 grep -a "\[abduction\]" "$LOG" | sed 's/\x1b\[[0-9;]*m//g' | tail -14
 say "poweroff"; sleep 20; stop_vm
+fi
 
+# like picking the disk in the firmware boot menu on real hardware: the NVRAM still prefers the (now gone) CD
 echo ">> stage 2: booting the installed disk (no ISO)"
-run_vm installed
+run_vm installed -device virtio-blk-pci,drive=hd,bootindex=0
 wait_for "login:" "${BOOT_TIMEOUT:-1200}" || { echo "FAIL: installed system didn't reach a login prompt"; tail -40 "$LOG"; exit 1; }
 sleep 60; shot "$T/installed-greeter.ppm"
 say root zorp "stty cols 200"

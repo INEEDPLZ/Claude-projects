@@ -24,11 +24,14 @@ done
 
 log "2/8 standard initramfs config (+ boot splash)"
 rm -f "$ROOT"/etc/mkinitcpio.conf.d/archiso.conf
+# fallback images (no autodetect) are ~230 MB each; only the LTS one is used (rescue entry), so the
+# zen kernel gets just its default image and the 1 GiB ESP keeps room for kernel updates
 for k in linux-zen linux-lts; do
+  presets="'default' 'fallback'"; [[ $k == linux-zen ]] && presets="'default'"
   cat > "$ROOT/etc/mkinitcpio.d/$k.preset" <<EOF
 # mkinitcpio preset for $k (ZorpOS)
 ALL_kver="/boot/vmlinuz-$k"
-PRESETS=('default' 'fallback')
+PRESETS=($presets)
 default_image="/boot/initramfs-$k.img"
 fallback_image="/boot/initramfs-$k-fallback.img"
 fallback_options="-S autodetect"
