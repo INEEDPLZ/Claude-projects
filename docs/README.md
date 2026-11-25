@@ -3,11 +3,22 @@
 An Arch Linux–based distro that crash-landed from another planet. Its builders copied
 Earth's mid-2000s "glossy future" design and got it slightly wrong. Arch underneath, alien on top.
 
-> **Status: Phase 5 of 6.** This is a bootable live ISO with the full gaming stack ([GAMING.md](GAMING.md)) and
-> **The Hive** alien desktop with Earthling Mode ([HIVE.md](HIVE.md)) and the **Xenoscribe** word processor
-> ([XENOSCRIBE.md](XENOSCRIBE.md)), fully themed: landing-UFO boot splash, alien-eye login,
-> GTK, cursors and Firefox ([THEMING.md](THEMING.md)). The installer arrives in Phase 6
-> (see [ROADMAP.md](ROADMAP.md)).
+> **Status: all 6 phases done.** Live ISO + installer ([INSTALL.md](INSTALL.md)), gaming stack
+> ([GAMING.md](GAMING.md)), **The Hive** alien desktop with Earthling Mode ([HIVE.md](HIVE.md)), the
+> **Xenoscribe** word processor ([XENOSCRIBE.md](XENOSCRIBE.md)), and the full theming pass: landing-UFO
+> boot splash, alien-eye login, GTK, cursors and Firefox ([THEMING.md](THEMING.md)).
+> Why things are the way they are: [DESIGN-DECISIONS.md](DESIGN-DECISIONS.md).
+
+## Quick start
+
+```sh
+sudo make iso          # build out/zorpos-*.iso (packages first, then the ISO)
+make run-vm            # try it in a QEMU window
+# write it to a USB stick (double-check the device!):
+sudo dd if=out/zorpos-*.iso of=/dev/sdX bs=4M status=progress oflag=sync
+```
+
+Boot it, try the Hive, then open **Install ZorpOS** in the Mothership Eye.
 
 ## Repo layout
 
@@ -47,6 +58,7 @@ Native build dependencies: `archiso librsvg python base-devel git pacman-contrib
 
 ```sh
 make test-vm           # headless BIOS + UEFI(OVMF) smoke tests; screenshots in out/test/{bios,uefi}/
+make test-install      # end-to-end: install onto a virtual disk (UEFI), boot it, check the greeter
 make run-vm            # interactive QEMU window, UEFI
 ISO=path/to.iso make test-vm-uefi
 ```
@@ -74,6 +86,24 @@ Included apps: Xenoscribe (word processor), Firefox, Amberol (music), Celluloid/
 Archive (files), foot (terminal), Steam + ProtonUp-Qt, and games: Chromium B.S.U., SuperTux, Pingus,
 Teeworlds, Mines, 2048, Quadrapassel, Chess and Aisleriot solitaire.
 
+## Keybinds
+
+| Keys | Does |
+|---|---|
+| **Super** (tap) / Super+Space | Mothership Eye: app rings; type to search |
+| **Super+Shift+E** | **Earthling Mode** on/off (English labels, normal dock, normal workspaces) |
+| Super+1..5 / Super+Shift+1..5 | travel to planet (workspace) / send window there |
+| Super+Tab | star map |
+| Super+J | put the window in a specimen jar (minimize) |
+| Super+D | plain app launcher, always normal |
+| Super+Return / Super+E | terminal / Specimen Archive (files) |
+| Super+Q / F / V | close / fullscreen / float |
+| Super+Shift+Q | leave Hyprland |
+| Right Shift+F12 | MangoHud vitals overlay in games |
+| Ctrl+Alt+F2..F6 | text consoles, always |
+
+More: [HIVE.md](HIVE.md). Xenoscribe shortcuts: [XENOSCRIBE.md](XENOSCRIBE.md).
+
 ## Escaping the weirdness (and recovery)
 
 Weird must never mean bricked. These always work:
@@ -85,6 +115,10 @@ Weird must never mean bricked. These always work:
 - **Boot param `zorp.earthling=1`**: forces Earthling Mode.
 - **Boot param `zorp.tty=1`**: no graphical login at all (greetd doesn't start).
 - **Super+Shift+E**: Earthling Mode toggle. **Super+D**: plain launcher. **Super+Shift+Q**: leave Hyprland.
+- **At login**: pick "Hyprland" (no Hive shell) or "Text console" in the greeter's session list.
+- **Installed boot menu**: "LTS kernel, text boot, Earthling Mode" and "rescue: text console only".
+- **Turn off the strange events**: Personalize Organism → Strange Events (transmissions, cursor trail).
+- **Underneath it's Arch Linux**: the Arch Wiki applies to everything.
 
 ## Theming rule
 

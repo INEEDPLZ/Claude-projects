@@ -121,3 +121,14 @@ owns the file (marker file). User customizations always win.
 ## 23. Plymouth in the live initramfs, with a text fallback
 The landing-UFO splash runs on the default boot entry. The "LTS, safe graphics" and "speech" entries
 keep a plain text boot so they stay a reliable fallback, and the screen reader needs text.
+
+## 24. One install back end, two front ends
+Calamares' generic bootloader and initramfs modules don't know about ZorpOS's two kernels, the Plymouth
+hook, or the archiso leftovers that must go. So Calamares runs the generic steps (partition, copy, users)
+and then calls `zorp-install-target`, the same script `zorp-install-cli` uses. That makes the scripted
+path the tested path (`make test-install`), and the GUI shares it.
+
+## 25. Installed systems get a rescue boot entry
+Besides the LTS + Earthling entry, systemd-boot gets "rescue: text console only" (LTS kernel, fallback
+initramfs, `systemd.unit=multi-user.target zorp.tty=1`). A broken GPU driver or shell update always
+leaves a way in from the boot menu alone, without needing the live ISO.

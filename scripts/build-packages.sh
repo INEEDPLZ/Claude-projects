@@ -14,7 +14,7 @@ FORCE=0; [[ ${1:-} == -f ]] && { FORCE=1; shift; }
 [[ $EUID -eq 0 ]] || { echo "run as root"; exit 1; }
 
 # dependency order matters only for packages that makedepend on each other (none yet)
-ORDER=(zorpos-fonts game-devices-udev xpadneo-dkms vkbasalt protonup-qt-bin zorpos-gamer-hive zorpos-gaming zorpos-hive xenoscribe zorpos-themes)
+ORDER=(zorpos-fonts game-devices-udev xpadneo-dkms vkbasalt protonup-qt-bin zorpos-gamer-hive zorpos-gaming zorpos-hive xenoscribe zorpos-themes calamares zorpos-installer)
 if (( $# )); then ORDER=("$@"); fi
 
 python3 "$ROOT/scripts/gen-tokens.py" >/dev/null
@@ -57,8 +57,12 @@ for pkg in "${ORDER[@]}"; do
   if (( !FORCE )) && ! grep -q '^# zorp-include:' "$src/PKGBUILD" && compgen -G "$REPO/$pkg-$ver-*.pkg.tar.zst" >/dev/null; then
     echo ">> $pkg $ver already built"; continue
   fi
-  mapfile -t mdeps < <(awk -F' = ' '/^\t(makedepends|checkdepends)/{print $2}' <<<"$srcinfo")
-  (( ${#mdeps[@]} )) && pacman -S --noconfirm --needed --asdeps "${mdeps[@]}" >/dev/null
+  # build needs make/check deps, and runtime deps too when the package links against them (e.g. calamares).
+  # Our own [zorpos] packages aren't in the build root's repos, so only official packages are installed.
+  mapfile -t mdeps < <(awk -F' = ' '/^\t(makedepends|checkdepends|depends)/{print $2}' <<<"$srcinfo" | sed 's/[<>=].*//' | sort -u)
+  avail=()
+  for d in "${mdeps[@]}"; do pacman -Si "$d" &>/dev/null && avail+=("$d"); done
+  (( ${#avail[@]} )) && pacman -S --noconfirm --needed --asdeps "${avail[@]}" >/dev/null
   echo ">> building $pkg $ver"
   (cd "$work" && runuser -u zorpbuild -- env PKGDEST="$REPO" makepkg -f -d --noconfirm --cleanbuild)
 done

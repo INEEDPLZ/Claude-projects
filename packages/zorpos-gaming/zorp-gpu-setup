@@ -34,7 +34,8 @@ echo "GPU(s):"; lspci | awk '/VGA|3D|Display/' | sed 's/^/  /'
 echo "Driver packages: ${pkgs[*]}"
 for n in "${notes[@]}"; do echo "note: $n"; done
 (( dry )) && exit 0
-if [[ $root == / ]]; then pacman -S --needed --noconfirm "${pkgs[@]}"
-else arch-chroot "$root" pacman -S --needed --noconfirm "${pkgs[@]}"; fi
+# -y: fresh installs have no sync databases (archiso strips them)
+if [[ $root == / ]]; then pacman -Sy --needed --noconfirm "${pkgs[@]}"
+else arch-chroot "$root" pacman -Sy --needed --noconfirm "${pkgs[@]}"; fi
 (( nv )) && systemctl --root="$root" enable nvidia-suspend.service nvidia-resume.service nvidia-hibernate.service 2>/dev/null || true
 echo "GPU drivers ready."

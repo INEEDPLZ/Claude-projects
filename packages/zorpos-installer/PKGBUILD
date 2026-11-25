@@ -1,0 +1,35 @@
+# Maintainer: ZorpOS Mothership Collective
+# "Abduction Sequence": ZorpOS installer = Calamares config + branding + the shared install back end
+# (zorp-install-target) + a scriptable CLI (zorp-install-cli).
+# zorp-include: scripts/gen-plymouth-art.py themes/tokens.json themes/branding packages/zorpos-installer/calamares packages/zorpos-installer/branding
+pkgname=zorpos-installer
+pkgver=0.6.0
+pkgrel=1
+pkgdesc="ZorpOS installer: Abduction Sequence (Calamares) + zorp-install-cli"
+arch=(any)
+url="https://github.com/ineedplz/claude-projects"
+license=(GPL-3.0-or-later)
+depends=(calamares arch-install-scripts gptfdisk dosfstools e2fsprogs squashfs-tools grub efibootmgr sudo zorpos-gaming)
+makedepends=(python librsvg)
+source=(zorp-install-target zorp-install-cli zorp-abduction os.zorp.AbductionSequence.desktop)
+sha256sums=(SKIP SKIP SKIP SKIP)
+
+build() {
+  cd "$startdir"
+  python scripts/gen-plymouth-art.py "$srcdir/art" >/dev/null
+  rsvg-convert -w 640 "$srcdir/art/ufo.svg" -o "$srcdir/ufo.png"
+  rsvg-convert -w 1000 "$srcdir/art/ufo.svg" -o "$srcdir/welcome.png"
+  rsvg-convert -w 128 themes/branding/zorp-mascot.svg -o "$srcdir/logo.png"
+  rsvg-convert -w 320 themes/branding/zorp-mascot.svg -o "$srcdir/zorp.png"
+}
+
+package() {
+  install -Dm755 -t "$pkgdir/usr/bin" zorp-install-target zorp-install-cli zorp-abduction
+  install -Dm644 os.zorp.AbductionSequence.desktop "$pkgdir/usr/share/applications/os.zorp.AbductionSequence.desktop"
+  local c="$pkgdir/etc/calamares"
+  install -Dm644 "$startdir/packages/zorpos-installer/calamares/settings.conf" "$c/settings.conf"
+  install -Dm644 -t "$c/modules" "$startdir"/packages/zorpos-installer/calamares/modules/*.conf
+  local b="$pkgdir/usr/share/calamares/branding/abduction"
+  install -Dm644 -t "$b" "$startdir"/packages/zorpos-installer/branding/{branding.desc,show.qml,stylesheet.qss}
+  install -Dm644 -t "$b" "$srcdir"/{ufo,welcome,logo,zorp}.png
+}

@@ -1,0 +1,37 @@
+---
+componentName: abduction
+welcomeStyleCalamares: false
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 1080px,700px
+windowPlacement: center
+sidebar: widget
+navigation: widget
+
+strings:
+  productName: "ZorpOS"
+  shortProductName: "ZorpOS"
+  version: "Abduction Sequence"
+  shortVersion: "2026"
+  versionedName: "ZorpOS: Abduction Sequence"
+  shortVersionedName: "ZorpOS"
+  bootloaderEntryName: "ZorpOS"
+  productUrl: "https://github.com/ineedplz/claude-projects"
+  supportUrl: "https://github.com/ineedplz/claude-projects/blob/main/docs/README.md"
+
+images:
+  productLogo: "logo.png"
+  productIcon: "logo.png"
+  productWelcome: "welcome.png"
+
+slideshow: "show.qml"
+slideshowAPI: 2
+
+style:
+  SidebarBackground: "#@ABYSS@"
+  SidebarText: "#@TEXT@"
+  SidebarTextCurrent: "#@VOID@"
+  SidebarBackgroundCurrent: "#@ACID@"
+
+uploadServer:
+  type: "none"

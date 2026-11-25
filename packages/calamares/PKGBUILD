@@ -1,0 +1,30 @@
+# Maintainer: ZorpOS Mothership Collective
+# Calamares installer framework (Qt6), built from upstream. ZorpOS config + branding live in
+# zorpos-installer ("Abduction Sequence"). Not in Arch's official repos, so we build it ourselves.
+pkgname=calamares
+pkgver=3.3.14
+pkgrel=1
+pkgdesc="Distribution-independent installer framework (built for ZorpOS)"
+arch=(x86_64)
+url="https://calamares.io"
+license=(GPL-3.0-or-later)
+depends=(qt6-base qt6-declarative qt6-svg kpmcore yaml-cpp boost-libs libpwquality polkit-qt6 kcoreaddons
+         kcrash ki18n solid icu squashfs-tools rsync gptfdisk dosfstools e2fsprogs btrfs-progs xfsprogs python)
+makedepends=(git cmake extra-cmake-modules qt6-tools qt6-translations boost)
+source=("git+https://github.com/calamares/calamares.git#tag=v${pkgver}")
+sha256sums=(SKIP)
+
+build() {
+  # modules we don't use (and whose deps we don't ship) are skipped
+  cmake -S calamares -B build \
+    -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+    -DWITH_QT6=ON -DWITH_PYTHON=ON -DBUILD_TESTING=OFF -DINSTALL_CONFIG=OFF \
+    -DSKIP_MODULES="webview interactiveterminal plasmalnf packagechooserq dracut dracutlukscfg \
+                    initramfscfg openrcdmcryptcfg services-openrc tracking license notesqml oemid \
+                    luksbootkeyfile luksopenswaphookcfg plymouthcfg grubcfg bootloader displaymanager"
+  cmake --build build
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+}

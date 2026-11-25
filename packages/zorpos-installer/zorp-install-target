@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+# zorp-install-target ROOT [--disk /dev/sdX]
+#
+# The ZorpOS-specific half of an install. Runs on the LIVE system after the live root filesystem has
+# been copied to ROOT (Calamares unpackfs, or zorp-install-cli), fstab exists, the user exists, and
+# (on UEFI) the ESP is mounted at ROOT/boot. Shared by Calamares and the CLI so both paths are the
+# same code, and the CLI path is what the automated QEMU test exercises.
+set -euo pipefail
+ROOT=${1:?usage: zorp-install-target ROOT [--disk DEV]}
+shift
+DISK=""
+while (($#)); do case $1 in --disk) DISK=$2; shift ;; *) echo "unknown arg $1" >&2; exit 2 ;; esac; shift; done
+[[ -d $ROOT/etc && -d $ROOT/usr ]] || { echo "$ROOT doesn't look like a copied system" >&2; exit 1; }
+log() { printf '\e[36m[abduction]\e[0m %s\n' "$*"; }
+inchroot() { arch-chroot "$ROOT" "$@"; }
+
+MEDIUM=/run/archiso/bootmnt/zorp/boot/x86_64
+UEFI=0; [[ -d /sys/firmware/efi/efivars ]] && UEFI=1
+
+log "1/8 kernels from the boot medium"
+for k in linux-zen linux-lts; do
+  install -Dm644 "$MEDIUM/vmlinuz-$k" "$ROOT/boot/vmlinuz-$k"
+done
+
+log "2/8 standard initramfs config (+ boot splash)"
+rm -f "$ROOT"/etc/mkinitcpio.conf.d/archiso.conf
+for k in linux-zen linux-lts; do
+  cat > "$ROOT/etc/mkinitcpio.d/$k.preset" <<EOF
+# mkinitcpio preset for $k (ZorpOS)
+ALL_kver="/boot/vmlinuz-$k"
+PRESETS=('default' 'fallback')
+default_image="/boot/initramfs-$k.img"
+fallback_image="/boot/initramfs-$k-fallback.img"
+fallback_options="-S autodetect"
+EOF
+done
+if ! grep -qE '^HOOKS=.*\bplymouth\b' "$ROOT/etc/mkinitcpio.conf"; then
+  sed -i -E 's/^(HOOKS=\([^)]*\budev\b)/\1 plymouth/' "$ROOT/etc/mkinitcpio.conf"
+fi
+
+log "3/8 removing live-only parts"
+inchroot userdel -r specimen 2>/dev/null || true
+rm -f "$ROOT"/etc/sudoers.d/10-zorpos-live \
+      "$ROOT"/etc/greetd/zorpos-live.toml \
+      "$ROOT"/etc/systemd/system/greetd.service.d/zz-live.conf \
+      "$ROOT"/etc/ssh/sshd_config.d/10-archiso.conf \
+      "$ROOT"/etc/systemd/journald.conf.d/volatile-storage.conf \
+      "$ROOT"/etc/systemd/logind.conf.d/do-not-suspend.conf \
+      "$ROOT"/etc/systemd/resolved.conf.d/archiso.conf \
+      "$ROOT"/etc/systemd/system-generators/systemd-gpt-auto-generator \
+      "$ROOT"/etc/systemd/system/systemd-loop@.service \
+      "$ROOT"/etc/pacman.d/hooks/uncomment-mirrors.hook \
+      "$ROOT"/etc/pacman.d/hooks/zzzz99-remove-custom-hooks-from-airootfs.hook \
+      "$ROOT"/root/.automated_script.sh "$ROOT"/root/.zlogin "$ROOT"/root/customize_airootfs.sh \
+      "$ROOT"/usr/local/bin/choose-mirror "$ROOT"/usr/local/bin/Installation_guide "$ROOT"/usr/local/bin/livecd-sound
+rmdir "$ROOT"/etc/systemd/system/greetd.service.d 2>/dev/null || true
+for unit in pacman-init.service choose-mirror.service etc-pacman.d-gnupg.mount livecd-talk.service livecd-alsa-unmuter.service; do
+  rm -f "$ROOT/etc/systemd/system/$unit"
+  find "$ROOT/etc/systemd/system" -name "$unit" -type l -delete
+done
+# VM guest helpers and sshd: enabled on the live medium for convenience, not wanted on installs
+for unit in sshd.service vboxservice.service vmtoolsd.service vmware-vmblock-fuse.service \
+            hv_fcopy_daemon.service hv_kvp_daemon.service hv_vss_daemon.service; do
+  find "$ROOT/etc/systemd/system" -name "$unit" -type l -delete
+done
+rm -rf "$ROOT"/etc/systemd/system/getty@tty1.service.d
+sed -i 's/^PRETTY_NAME=.*/PRETTY_NAME="ZorpOS"/' "$ROOT/etc/os-release"
+cat > "$ROOT/etc/motd" <<'EOF'
+
+  ZorpOS: Arch underneath, alien on top.
+  zorp-rescue        recovery guide        zorp-escape-hatch   ways out of the weirdness
+  Super+Shift+E      Earthling Mode        Ctrl+Alt+F3         a text console, always
+
+EOF
+
+log "4/8 pacman keyring + package database"
+inchroot pacman-key --init >/dev/null
+inchroot pacman-key --populate archlinux >/dev/null
+sed -i 's/^#Server = https:\/\/geo.mirror.pkgbuild.com/Server = https:\/\/geo.mirror.pkgbuild.com/' "$ROOT/etc/pacman.d/mirrorlist" || true
+grep -q '^Server' "$ROOT/etc/pacman.d/mirrorlist" || echo 'Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch' >> "$ROOT/etc/pacman.d/mirrorlist"
+
+log "5/8 graphical login: greetd + the eye greeter"
+ln -sf /usr/lib/systemd/system/greetd.service "$ROOT/etc/systemd/system/display-manager.service"
+ln -sf /usr/lib/systemd/system/graphical.target "$ROOT/etc/systemd/system/default.target"
+
+log "6/8 GPU drivers"
+if ping -c1 -W3 geo.mirror.pkgbuild.com >/dev/null 2>&1 || curl -fsI --max-time 5 https://geo.mirror.pkgbuild.com >/dev/null 2>&1; then
+  zorp-gpu-setup --root "$ROOT" || log "GPU setup failed; run 'sudo zorp-gpu-setup' after first boot"
+else
+  zorp-gpu-setup --dry-run || true
+  log "offline: Mesa drivers are installed; for NVIDIA run 'sudo zorp-gpu-setup' after connecting"
+fi
+
+log "7/8 initramfs for both kernels"
+inchroot mkinitcpio -P
+
+log "8/8 bootloader"
+ROOTDEV=$(findmnt -no SOURCE "$ROOT")
+UUID=$(blkid -s UUID -o value "$ROOTDEV")
+CMD="root=UUID=$UUID rw"
+# --serial-console (CLI) / tests: also put the console on the first serial port
+[[ ${ZORP_SERIAL_CONSOLE:-0} == 1 ]] && CMD+=" console=ttyS0,115200 console=tty0"
+if ((UEFI)); then
+  # register with the firmware if efivars are writable; otherwise install to the fallback path only
+  inchroot bootctl --esp-path=/boot install || inchroot bootctl --esp-path=/boot --no-variables install
+  mkdir -p "$ROOT/boot/loader/entries"
+  printf 'default zorpos-zen.conf\ntimeout 3\nconsole-mode max\neditor yes\n' > "$ROOT/boot/loader/loader.conf"
+  cat > "$ROOT/boot/loader/entries/zorpos-zen.conf" <<EOF
+title   ZorpOS
+linux   /vmlinuz-linux-zen
+initrd  /initramfs-linux-zen.img
+options $CMD quiet splash
+EOF
+  cat > "$ROOT/boot/loader/entries/zorpos-lts.conf" <<EOF
+title   ZorpOS (LTS kernel, text boot, Earthling Mode)
+linux   /vmlinuz-linux-lts
+initrd  /initramfs-linux-lts.img
+options $CMD zorp.earthling=1
+EOF
+  cat > "$ROOT/boot/loader/entries/zorpos-rescue.conf" <<EOF
+title   ZorpOS (rescue: text console only)
+linux   /vmlinuz-linux-lts
+initrd  /initramfs-linux-lts-fallback.img
+options $CMD systemd.unit=multi-user.target zorp.tty=1
+EOF
+else
+  [[ -n $DISK ]] || DISK=/dev/$(lsblk -no PKNAME "$ROOTDEV" | head -1)
+  sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"${CMD#root=UUID=$UUID rw}\"|" "$ROOT/etc/default/grub"
+  sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/; s/^#\?GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="ZorpOS"/' "$ROOT/etc/default/grub"
+  inchroot grub-install --target=i386-pc "$DISK"
+  inchroot grub-mkconfig -o /boot/grub/grub.cfg
+fi
+log "done. The specimen has been abducted to $ROOTDEV."

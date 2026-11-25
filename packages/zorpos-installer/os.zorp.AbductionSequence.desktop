@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Install ZorpOS
+GenericName=Installer
+Comment=Abduction Sequence: install ZorpOS to this computer
+Exec=zorp-abduction
+Icon=zorpos
+Type=Application
+Categories=System;

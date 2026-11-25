@@ -14,7 +14,9 @@ the local `[zorpos]` repo that ships inside the ISO.
 | `zorpos-fonts` | 2 | Doto + Comfortaa (SIL OFL) | google/fonts at a pinned commit |
 | `zorpos-gamer-hive` | 2 | ours: replaces AUR `gamescope-session-steam` | this repo |
 | `zorpos-gaming` | 2 | ours: metapackage + config | this repo |
-| `calamares` | 6 | installer; not in official repos | will be built from upstream the same way |
+| `calamares` | 6 | installer framework; not in official repos | github.com/calamares/calamares, tag v3.3.14 (Qt6) |
+| `zorpos-installer` | 6 | ours: Abduction Sequence config + branding + `zorp-install-target` / `zorp-install-cli` | this repo |
+| `zorpos-hive`, `xenoscribe`, `zorpos-themes` | 3–5 | ours | this repo |
 
 These were on the original AUR list but are **official now**, so we use the repo versions:
 `protontricks` (extra), `wine-staging` (extra), `gamescope` (extra), `mangohud` / `lib32-mangohud`,

@@ -1,0 +1,9 @@
+/* Abduction Sequence: dark teal glass with chrome accents (colors from tokens) */
+QWidget { background-color: #@ABYSS@; color: #@TEXT@; }
+QPushButton { border-radius: 14px; padding: 6px 18px; color: #@VOID@;
+  background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #@CHROME_HI@, stop:0.45 #@CHROME@, stop:0.55 #@CHROME_LO@, stop:1 #@CHROME@); }
+QPushButton:hover { border: 2px solid #@ACID@; }
+QLineEdit, QComboBox, QListView, QTreeView { background-color: #@VOID@; color: #@AQUA_GLOW@; border: 1px solid #@AQUA@; border-radius: 8px; }
+QProgressBar { border: 1px solid #@AQUA@; border-radius: 9px; background: #@VOID@; text-align: center; color: #@TEXT@; }
+QProgressBar::chunk { border-radius: 8px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #@AQUA@, stop:1 #@ACID@); }
+#sidebarApp { background-color: #@ABYSS@; }
