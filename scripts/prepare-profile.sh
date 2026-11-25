@@ -24,7 +24,6 @@ cp -a "$ROOT/archiso" "$OUT"
 cp "$GEN/splash.png" "$OUT/syslinux/splash.png"
 
 # branding that lives inside the live system
-install -Dm644 "$ROOT/themes/branding/zorp-mascot.svg" "$OUT/airootfs/usr/share/pixmaps/zorpos.svg"
 install -Dm644 "$GEN/zorpos-256.png"                   "$OUT/airootfs/usr/share/pixmaps/zorpos.png"
 install -Dm644 "$GEN/aurora-1920.png"                  "$OUT/airootfs/usr/share/backgrounds/zorpos/aurora.png"
 install -Dm644 "$GEN/aurora.svg"                       "$OUT/airootfs/usr/share/backgrounds/zorpos/aurora.svg"
