@@ -61,3 +61,10 @@ screen loop.
 ## 11. Live ISO user
 Steam refuses to run as root, so tty1 now auto-logs in as `specimen` (passwordless sudo, live only).
 Root still has tty2–6.
+
+## 12. The Hive: Python + GTK4 + gtk4-layer-shell (not AGS/Astal)
+**Decided (owner, Phase 3).** AGS/Astal aren't in Arch's official repos, and building them from
+source would add a large, fast-moving dependency. Python + GTK4 + `gtk4-layer-shell` are all official
+packages. They're the same stack as the Docking splash, so ZorpOS's UI code shares one toolkit.
+Hyprland stays the compositor (with jelly animations, see #2). The shell talks to it over
+Hyprland's IPC socket.
