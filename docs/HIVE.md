@@ -79,7 +79,7 @@ The boot parameter `zorp.earthling=1` forces it for that boot (the "LTS, safe gr
 Login goes through **greetd** and the ZorpOS eye greeter ([THEMING.md](THEMING.md)). Pick "The Hive"
 (`zorp-session`, which starts Hyprland), "Gamer Hive", plain Hyprland, or a text console. On the live ISO,
 `specimen` logs straight into the Hive, and the greeter appears after logout. From a text console,
-`zorp-session` starts the Hive by hand. Boot with `zorp.tty=1` to skip graphical login entirely.
+`zorp-session` starts the Hive by hand (its log: `~/.local/state/zorpos/session.log`). Boot with `zorp.tty=1` to skip graphical login entirely.
 
 ## Developing
 

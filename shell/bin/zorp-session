@@ -3,4 +3,7 @@
 . /usr/lib/zorpos/zorp-env.sh
 mkdir -p "$HOME/.config/hypr"
 [ -e "$HOME/.config/hypr/hyprland.lua" ] || cp /usr/share/zorpos/hypr/hyprland.user.lua "$HOME/.config/hypr/hyprland.lua"
-exec start-hyprland
+# keep Hyprland's startup chatter off the console; it goes to a log instead
+log="${XDG_STATE_HOME:-$HOME/.local/state}/zorpos/session.log"
+mkdir -p "$(dirname "$log")"
+exec start-hyprland >"$log" 2>&1
