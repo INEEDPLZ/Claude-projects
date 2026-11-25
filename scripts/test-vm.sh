@@ -64,11 +64,13 @@ sleep 8; shot "$T/02-console.ppm"
 probe_ok=1
 if (( ok )) && [[ ${PROBE:-1} == 1 ]]; then
   say root "" "stty cols 200; clear"
-  say "echo ZORP-PROBE-BEGIN; zorp-gaming-doctor; echo DOCTOR_RC=\$?; dkms status; systemctl --failed --no-legend --plain; echo ZORP-PROBE-END"
+  say "echo ZORP-PROBE-BEGIN; zorp-gaming-doctor; echo DOCTOR_RC=\$?; dkms status; systemctl --no-pager --failed --no-legend --plain; echo ZORP-PROBE-END"
   for _ in $(seq 1 60); do grep -q "^ZORP-PROBE-END" "$T/serial.log" && break; sleep 5; done
   sed -n '/^ZORP-PROBE-BEGIN/,/^ZORP-PROBE-END/p' "$T/serial.log" | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g; s/\r//g' > "$T/probe.txt"
   echo "---- probe ($MODE) ----"; cat "$T/probe.txt"
   grep -q "DOCTOR_RC=0" "$T/probe.txt" || probe_ok=0
+  # by now tty1's autologin has had time to start the Hive (or fall back to the shell)
+  sleep "${DESKTOP_WAIT:-60}"; shot "$T/03-desktop.ppm"
 fi
 
 if (( ok && probe_ok )); then
