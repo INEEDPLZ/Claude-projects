@@ -57,5 +57,5 @@ for pkg in "${ORDER[@]}"; do
   (cd "$work" && runuser -u zorpbuild -- env PKGDEST="$REPO" makepkg -f -d --noconfirm --cleanbuild)
 done
 
-repo-add -q -n -R "$REPO/zorpos.db.tar.zst" "$REPO"/*.pkg.tar.zst
+repo-add -q -R "$REPO/zorpos.db.tar.zst" "$REPO"/*.pkg.tar.zst
 ls -1 "$REPO"
