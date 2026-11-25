@@ -13,14 +13,12 @@ boot splash now, and becomes the Plymouth boot animation in Phase 5 (Zorp riding
 ## 2. "Assets from Garuda Linux"
 Garuda's wobbly windows aren't a Garuda asset. They come from **KWin's built-in Wobbly Windows
 effect** (KDE). Garuda's actual artwork is their own branding, so we don't copy it.
-Hyprland (the compositor the brief recommends) has no stock wobbly-window effect. The plan for
-Phase 3:
-- Default: Hyprland spring/overshoot bezier curves on window move, open and close
-  ("gelatinous membrane" motion). It is stable and built in.
-- Evaluate a community wobbly plugin via `hyprpm`. Ship it only if it survives Hyprland updates.
-  Plugins break on every Hyprland ABI bump, and a broken plugin must not be able to break login.
-- If true wobbly windows matter more than Hyprland, the alternative is KWin on Plasma 6 + a
-  layer-shell Hive. That's a decision for you before Phase 3.
+Hyprland (the compositor the brief recommends) has no stock wobbly-window effect.
+
+**Decided (owner, Phase 1): stay on Hyprland and use jelly animations.** Phase 3 ships
+Hyprland's built-in animation engine with overshoot/spring bezier curves on window move,
+resize, open, close and workspace switches ("gelatinous membrane" motion). It needs no plugins,
+so a Hyprland update can't break login. KWin/Plasma is not being pursued.
 
 ## 3. Reference skins are inspiration only
 No Microsoft logos, no media-player skins and no trademarked names. Every widget is drawn from
