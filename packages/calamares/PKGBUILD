@@ -8,6 +8,7 @@ pkgdesc="Distribution-independent installer framework (built for ZorpOS)"
 arch=(x86_64)
 url="https://calamares.io"
 license=(GPL-3.0-or-later)
+options=(!debug)
 depends=(qt6-base qt6-declarative qt6-svg kpmcore yaml-cpp boost-libs libpwquality polkit-qt6 kcoreaddons
          kcrash ki18n solid icu squashfs-tools rsync gptfdisk dosfstools e2fsprogs btrfs-progs xfsprogs python)
 makedepends=(git cmake extra-cmake-modules qt6-tools qt6-translations boost)
