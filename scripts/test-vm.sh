@@ -44,7 +44,7 @@ import socket,sys; s=socket.socket(socket.AF_UNIX); s.connect(sys.argv[1]); s.se
 
 # boot menu screenshot after firmware hands over
 for _ in $(seq 1 60); do [[ -S $MON ]] && break; sleep 1; done
-sleep "${MENU_WAIT:-12}"; shot "$T/01-bootmenu.ppm"
+sleep "${MENU_WAIT:-6}"; shot "$T/01-bootmenu.ppm"
 
 start=$SECONDS; ok=0
 while (( SECONDS - start < TIMEOUT )); do
@@ -56,7 +56,7 @@ sleep 8; shot "$T/02-console.ppm"
 
 echo "---- serial tail ($MODE) ----"; tail -n 25 "$T/serial.log" | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g'
 if (( ok )); then
-  echo "PASS [$MODE]: reached login prompt in $((SECONDS - start + ${MENU_WAIT:-12}))s"
+  echo "PASS [$MODE]: reached login prompt in $((SECONDS - start + ${MENU_WAIT:-6}))s"
   grep -E "Failed to start|FAILED" "$T/serial.log" | sed 's/\x1b\[[0-9;]*m//g' | sort -u | sed 's/^/  warn: /' || true
 else
   echo "FAIL [$MODE]: no login prompt within ${TIMEOUT}s"; exit 1
