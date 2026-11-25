@@ -35,7 +35,7 @@ case $BUILDER in
     $BUILDER run --rm --privileged -e ZORP_FAST="${ZORP_FAST:-0}" -v "$ROOT:/zorp" docker.io/archlinux/archlinux:latest \
       bash -c "pacman-key --init >/dev/null; pacman-key --populate >/dev/null; $inner" ;;
   chroot)
-    AR="$ROOT/build/archroot"
+    AR="$(readlink -f "$ROOT/build/archroot" 2>/dev/null || echo "$ROOT/build/archroot")"
     if [[ ! -x $AR/usr/bin/pacman ]]; then
       mkdir -p "$ROOT/build"
       curl -fL --retry 3 -o "$ROOT/build/bootstrap.tar.zst" "$MIRROR/iso/latest/archlinux-bootstrap-x86_64.tar.zst"
@@ -57,7 +57,7 @@ case $BUILDER in
     mkdir -p "$AR/zorp"
     # a stale (empty) bind mount can linger after lazy unmounts: verify the repo is really visible
     if [[ ! -x "$AR/zorp/scripts/build-iso.sh" ]]; then
-      mountpoint -q "$AR/zorp" && umount -l "$AR/zorp"
+      umount -l "$AR/zorp" 2>/dev/null || true
       mount --bind "$ROOT" "$AR/zorp"
     fi
     env_pass=$(env | grep -iE '^(https?|no)_proxy=' | sed "s/^/export /;s/=/='/;s/$/'/" || true)
