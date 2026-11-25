@@ -52,7 +52,12 @@ case $BUILDER in
     mountpoint -q "$AR/proc" || mount -t proc proc "$AR/proc"
     mountpoint -q "$AR/sys"  || mount --rbind /sys "$AR/sys"
     mountpoint -q "$AR/dev"  || mount --rbind /dev "$AR/dev"
-    mkdir -p "$AR/zorp"; mountpoint -q "$AR/zorp" || mount --bind "$ROOT" "$AR/zorp"
+    mkdir -p "$AR/zorp"
+    # a stale (empty) bind mount can linger after lazy unmounts: verify the repo is really visible
+    if [[ ! -x "$AR/zorp/scripts/build-iso.sh" ]]; then
+      mountpoint -q "$AR/zorp" && umount -l "$AR/zorp"
+      mount --bind "$ROOT" "$AR/zorp"
+    fi
     env_pass=$(env | grep -iE '^(https?|no)_proxy=' | sed "s/^/export /;s/=/='/;s/$/'/" || true)
     # clean environment: host CA/tool variables point at paths that don't exist in the chroot
     chroot "$AR" /usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/bin HOME=/root TERM="${TERM:-xterm}" \
