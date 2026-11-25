@@ -43,7 +43,13 @@ for pkg in "${ORDER[@]}"; do
   while read -r inc; do
     for path in $inc; do mkdir -p "$work/$(dirname "$path")"; cp -a "$ROOT/$path" "$work/$path"; done
   done < <(sed -n 's/^# zorp-include: //p' "$src/PKGBUILD")
-  stamp "$work"; chown -R zorpbuild: "$work"
+  stamp "$work"
+  # in-repo packages rebuild without a version bump: give each build a unique pkgrel so the
+  # filename changes (pacman caches by filename and would otherwise reuse a stale copy)
+  if grep -q '^# zorp-include:' "$src/PKGBUILD"; then
+    sed -i "s/^pkgrel=.*/pkgrel=$(date -u +%y%m%d%H%M)/" "$work/PKGBUILD"
+  fi
+  chown -R zorpbuild: "$work"
 
   srcinfo="$(cd "$work" && runuser -u zorpbuild -- makepkg --printsrcinfo)"
   ver="$(awk -F' = ' '/^\tpkgver/{v=$2} /^\tpkgrel/{r=$2} /^\tepoch/{e=$2":"} END{print e v "-" r}' <<<"$srcinfo")"
