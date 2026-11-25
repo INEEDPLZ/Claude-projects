@@ -12,6 +12,7 @@ bind
 bolt
 brltty
 btrfs-progs
+cage
 celluloid
 chromium-bsu
 clonezilla
@@ -44,6 +45,7 @@ gnome-mines
 gpart
 gpm
 gptfdisk
+greetd
 grml-zsh-config
 grub
 hdparm
@@ -112,6 +114,7 @@ pipewire
 pipewire-alsa
 pipewire-jack
 pipewire-pulse
+plymouth
 polkit
 ppp
 pptpclient
@@ -164,4 +167,5 @@ xl2tpd
 zip
 zorpos-gaming
 zorpos-hive
+zorpos-themes
 zsh

@@ -1,0 +1,18 @@
+{
+  "policies": {
+    "DisableTelemetry": true,
+    "DisableFirefoxStudies": true,
+    "DontCheckDefaultBrowser": true,
+    "OverrideFirstRunPage": "",
+    "OverridePostUpdatePage": "",
+    "UserMessaging": { "WhatsNew": false, "ExtensionRecommendations": false, "FeatureRecommendations": false, "SkipOnboarding": true, "MoreFromMozilla": false },
+    "Homepage": { "URL": "file:///usr/share/zorpos/firefox/newtab/index.html", "StartPage": "homepage", "Locked": false },
+    "Preferences": {
+      "toolkit.legacyUserProfileCustomizations.stylesheets": { "Value": true, "Status": "default" },
+      "browser.tabs.drawInTitlebar": { "Value": true, "Status": "default" },
+      "svg.context-properties.content.enabled": { "Value": true, "Status": "default" },
+      "browser.theme.toolbar-theme": { "Value": 0, "Status": "default" },
+      "layout.css.prefers-color-scheme.content-override": { "Value": 0, "Status": "default" }
+    }
+  }
+}

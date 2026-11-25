@@ -1,0 +1,6 @@
+#!/bin/sh
+# Start The Hive (Hyprland + the ZorpOS shell). Used by the greeter; also runnable from a text console.
+. /usr/lib/zorpos/zorp-env.sh
+mkdir -p "$HOME/.config/hypr"
+[ -e "$HOME/.config/hypr/hyprland.lua" ] || cp /usr/share/zorpos/hypr/hyprland.user.lua "$HOME/.config/hypr/hyprland.lua"
+exec start-hyprland

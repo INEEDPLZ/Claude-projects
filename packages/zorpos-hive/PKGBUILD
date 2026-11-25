@@ -3,7 +3,7 @@
 # + the Zorpglyph alien font. Built from this repo's shell/ and scripts/.
 # zorp-include: shell scripts/gen-glyphs.py scripts/gen-icons.py scripts/gen-aurora.py themes/tokens.json themes/branding
 pkgname=zorpos-hive
-pkgver=0.3.0
+pkgver=0.5.0
 pkgrel=1
 pkgdesc="The Hive: ZorpOS alien desktop shell on Hyprland (with Earthling Mode)"
 arch=(any)
@@ -13,13 +13,14 @@ depends=(
   hyprland hyprpolkitagent xdg-desktop-portal-hyprland xdg-desktop-portal-gtk xorg-xwayland qt6-wayland
   python python-gobject python-cairo python-psutil gtk4 gtk4-layer-shell playerctl lm_sensors
   libnotify mako foot fuzzel nautilus gvfs librsvg grim slurp wl-clipboard brightnessctl wireplumber
-  adwaita-icon-theme noto-fonts noto-fonts-emoji zorpos-fonts dconf
+  adwaita-icon-theme noto-fonts noto-fonts-emoji zorpos-fonts dconf greetd cage
 )
 makedepends=(fontforge python)
 install=zorpos-hive.install
-source=(zorp-hive-autostart.sh gtk-settings.ini dconf-zorpos mako.conf fuzzel.ini foot.ini
+backup=(etc/greetd/zorpos.toml)
+source=(zorp-hive.desktop greetd-zorpos.toml greetd-zorpos.conf gtk-settings.ini dconf-zorpos mako.conf fuzzel.ini foot.ini
         os.zorp.PersonalizeOrganism.desktop os.zorp.SpecimenArchive.desktop)
-sha256sums=(SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP)
+sha256sums=(SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP)
 
 build() {
   cd "$startdir"
@@ -39,7 +40,7 @@ package() {
   install -d "$pkgdir/usr/lib/zorpos/hive"
   cp -r "$s/shell/zorphive" "$pkgdir/usr/lib/zorpos/hive/"
   find "$pkgdir/usr/lib/zorpos/hive" -name '__pycache__' -prune -exec rm -rf {} +
-  for b in zorp-hive zorp-hivectl zorp-organism zorp-specimen-archive; do
+  for b in zorp-hive zorp-hivectl zorp-organism zorp-specimen-archive zorp-session zorp-greeter; do
     install -Dm755 "$s/shell/bin/$b" "$pkgdir/usr/bin/$b"
   done
   sed -i 's|^exec python3 -m|export PYTHONPATH=/usr/lib/zorpos/hive${PYTHONPATH:+:$PYTHONPATH}\nexec python3 -m|' \
@@ -56,7 +57,11 @@ package() {
   install -d "$pkgdir/usr/share/icons"
   cp -r "$srcdir/icons/Zorp" "$pkgdir/usr/share/icons/Zorp"
   install -Dm644 -t "$pkgdir/usr/share/applications" os.zorp.PersonalizeOrganism.desktop os.zorp.SpecimenArchive.desktop
-  install -Dm644 zorp-hive-autostart.sh "$pkgdir/etc/profile.d/zorp-hive-autostart.sh"
+  install -Dm644 "$s/shell/bin/zorp-env.sh" "$pkgdir/usr/lib/zorpos/zorp-env.sh"
+  # login: greetd + cage + the alien-eye greeter; "The Hive" session
+  install -Dm644 zorp-hive.desktop "$pkgdir/usr/share/wayland-sessions/zorp-hive.desktop"
+  install -Dm644 greetd-zorpos.toml "$pkgdir/etc/greetd/zorpos.toml"
+  install -Dm644 greetd-zorpos.conf "$pkgdir/usr/lib/systemd/system/greetd.service.d/zorpos.conf"
   install -Dm644 gtk-settings.ini "$pkgdir/etc/skel/.config/gtk-4.0/settings.ini"
   install -Dm644 gtk-settings.ini "$pkgdir/etc/skel/.config/gtk-3.0/settings.ini"
   install -Dm644 dconf-zorpos "$pkgdir/etc/dconf/db/local.d/00-zorpos"

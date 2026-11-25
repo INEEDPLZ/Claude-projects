@@ -1,0 +1,38 @@
+/* ZorpOS Firefox skin: glossy chrome tabs, teal glass toolbar. Colors from themes/tokens.json. */
+:root {
+  --zorp-void: #@VOID@; --zorp-abyss: #@ABYSS@; --zorp-teal: #@TEAL@; --zorp-teal-deep: #@TEAL_DEEP@;
+  --zorp-aqua: #@AQUA@; --zorp-aqua-glow: #@AQUA_GLOW@; --zorp-acid: #@ACID@;
+  --zorp-chrome-hi: #@CHROME_HI@; --zorp-chrome: #@CHROME@; --zorp-chrome-lo: #@CHROME_LO@; --zorp-chrome-dark: #@CHROME_DARK@;
+  --zorp-text: #@TEXT@;
+  --toolbar-bgcolor: color-mix(in srgb, var(--zorp-teal-deep) 82%, transparent) !important;
+  --toolbar-color: var(--zorp-text) !important;
+  --lwt-accent-color: var(--zorp-void) !important;
+  --toolbar-field-background-color: color-mix(in srgb, var(--zorp-void) 85%, transparent) !important;
+  --toolbar-field-color: var(--zorp-aqua-glow) !important;
+  --toolbar-field-focus-border-color: var(--zorp-acid) !important;
+  --tab-selected-textcolor: var(--zorp-void) !important;
+}
+#navigator-toolbox {
+  background: radial-gradient(ellipse at 20% 0%, var(--zorp-teal) 0%, var(--zorp-abyss) 60%, var(--zorp-void) 100%) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--zorp-aqua) 50%, transparent) !important;
+}
+#TabsToolbar { padding-top: 4px !important; }
+/* tabs: chrome pills */
+.tabbrowser-tab .tab-background {
+  border-radius: 999px !important; margin-block: 3px !important;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--zorp-chrome) 35%, transparent), transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--zorp-aqua-glow) 25%, transparent) !important;
+}
+.tabbrowser-tab[selected] .tab-background {
+  background: linear-gradient(to bottom, var(--zorp-chrome-hi), var(--zorp-chrome) 45%, var(--zorp-chrome-lo) 55%, var(--zorp-chrome) 100%) !important;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--zorp-aqua) 70%, transparent), inset 0 -2px 4px color-mix(in srgb, var(--zorp-void) 40%, transparent) !important;
+}
+.tabbrowser-tab[selected] .tab-label { color: var(--zorp-void) !important; font-weight: 700 !important; }
+.tabbrowser-tab:not([selected]) .tab-label { color: var(--zorp-text) !important; }
+.tab-close-button { border-radius: 999px !important; }
+/* nav bar: teal glass */
+#nav-bar { background: var(--toolbar-bgcolor) !important; border-top: none !important; box-shadow: none !important; }
+#urlbar-background { border-radius: 999px !important; border: 1px solid color-mix(in srgb, var(--zorp-aqua) 55%, transparent) !important; }
+#urlbar[focused] #urlbar-background { box-shadow: 0 0 12px var(--zorp-acid) !important; border-color: var(--zorp-acid) !important; }
+#nav-bar toolbarbutton .toolbarbutton-icon { border-radius: 999px !important; }
+#nav-bar toolbarbutton:hover .toolbarbutton-icon { background: color-mix(in srgb, var(--zorp-aqua) 25%, transparent) !important; }

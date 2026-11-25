@@ -3,9 +3,10 @@
 An Arch Linux–based distro that crash-landed from another planet. Its builders copied
 Earth's mid-2000s "glossy future" design and got it slightly wrong. Arch underneath, alien on top.
 
-> **Status: Phase 4 of 6.** This is a bootable live ISO with the full gaming stack ([GAMING.md](GAMING.md)) and
+> **Status: Phase 5 of 6.** This is a bootable live ISO with the full gaming stack ([GAMING.md](GAMING.md)) and
 > **The Hive** alien desktop with Earthling Mode ([HIVE.md](HIVE.md)) and the **Xenoscribe** word processor
-> ([XENOSCRIBE.md](XENOSCRIBE.md)). The theming pass and the installer arrive in later phases
+> ([XENOSCRIBE.md](XENOSCRIBE.md)), fully themed: landing-UFO boot splash, alien-eye login,
+> GTK, cursors and Firefox ([THEMING.md](THEMING.md)). The installer arrives in Phase 6
 > (see [ROADMAP.md](ROADMAP.md)).
 
 ## Repo layout
@@ -65,8 +66,8 @@ It uses KVM if `/dev/kvm` is writable and falls back to TCG otherwise (slow: all
 
 ## Live session
 
-tty1 auto-logs in as **`specimen`** (no password, passwordless sudo, live ISO only) and starts **the Hive**
-(Hyprland). The first boot offers Hive Mode or Earthling Mode. Root can log in on tty2–6 with an empty
+The live user **`specimen`** (no password, passwordless sudo, live ISO only) is logged straight into **the Hive**
+by greetd. Log out to see the alien-eye greeter. The first boot offers Hive Mode or Earthling Mode. Root can log in on tty2–6 with an empty
 password. From a TTY, `zorp-gamer-hive` boots into Steam Big Picture.
 
 Included apps: Xenoscribe (word processor), Firefox, Amberol (music), Celluloid/mpv (video), Personalize Organism (settings), Specimen
@@ -82,7 +83,7 @@ Weird must never mean bricked. These always work:
 - **`zorp-escape-hatch`**: every way out of the alien UI.
 - **Boot param `systemd.unit=multi-user.target`**: no graphics at all.
 - **Boot param `zorp.earthling=1`**: forces Earthling Mode.
-- **Boot param `zorp.tty=1`**: don't start the Hive on login.
+- **Boot param `zorp.tty=1`**: no graphical login at all (greetd doesn't start).
 - **Super+Shift+E**: Earthling Mode toggle. **Super+D**: plain launcher. **Super+Shift+Q**: leave Hyprland.
 
 ## Theming rule

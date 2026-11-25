@@ -1,4 +1,7 @@
 [org/gnome/desktop/interface]
 icon-theme='Zorp'
+gtk-theme='Zorp'
+cursor-theme='ZorpCursors'
+cursor-size=28
 color-scheme='prefer-dark'
 font-name='Comfortaa 11'

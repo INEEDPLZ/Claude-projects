@@ -1,0 +1,94 @@
+// ZorpOS boot splash: the scout saucer (with Zorp aboard) descends over the aurora while booting.
+W = Window.GetWidth(); H = Window.GetHeight();
+Window.SetBackgroundTopColor(0.01, 0.09, 0.11);
+Window.SetBackgroundBottomColor(0.04, 0.29, 0.33);
+
+bg_img = Image("background.png");
+bg = Sprite(bg_img.Scale(W, H)); bg.SetZ(-100);
+
+ufo_w = Math.Int(W * 0.24); if (ufo_w < 220) ufo_w = 220;
+ufo_img = Image("ufo.png"); ufo_img = ufo_img.Scale(ufo_w, Math.Int(ufo_w * 0.6));
+ufo = Sprite(ufo_img); ufo.SetZ(10);
+
+beam_img = Image("beam.png"); beam_img = beam_img.Scale(Math.Int(ufo_w * 0.8), Math.Int(H * 0.42));
+beam = Sprite(beam_img); beam.SetZ(5); beam.SetOpacity(0);
+
+pad_img = Image("pad.png"); pad_img = pad_img.Scale(Math.Int(ufo_w * 1.3), Math.Int(ufo_w * 0.26));
+pad = Sprite(pad_img); pad.SetZ(2);
+ground_y = H * 0.80;
+pad.SetX(W / 2 - pad_img.GetWidth() / 2); pad.SetY(ground_y - pad_img.GetHeight() / 2);
+
+label_img = Image.Text("LANDING", 0.56, 0.97, 0.94, 1, "Doto Bold 22");
+label = Sprite(label_img); label.SetZ(20);
+label.SetX(W / 2 - label_img.GetWidth() / 2); label.SetY(H * 0.88);
+
+dots = [];
+for (i = 0; i < 3; i++) { dots[i] = Sprite(Image("dot.png")); dots[i].SetZ(20); dots[i].SetOpacity(0); }
+
+progress = 0; t = 0; landed = 0;
+start_y = -ufo_img.GetHeight();
+final_y = ground_y - ufo_img.GetHeight() * 1.45;
+
+fun ease(p) { return 1 - (1 - p) * (1 - p) * (1 - p); }
+
+fun refresh() {
+  t++;
+  p = progress; if (landed) p = 1;
+  y = start_y + (final_y - start_y) * ease(p) + Math.Sin(t / 18) * 6 * (1 - p * 0.6);
+  x = W / 2 - ufo_img.GetWidth() / 2 + Math.Sin(t / 47) * 10 * (1 - p);
+  ufo.SetX(x); ufo.SetY(y);
+  // tractor beam switches on for the final approach and pulses
+  if (p > 0.55) {
+    beam.SetX(W / 2 - beam_img.GetWidth() / 2);
+    beam.SetY(y + ufo_img.GetHeight() * 0.78);
+    beam.SetOpacity((p - 0.55) / 0.45 * (0.65 + 0.35 * Math.Sin(t / 6)));
+  }
+  pad.SetOpacity(0.4 + 0.6 * p);
+  for (i = 0; i < 3; i++) {
+    dots[i].SetX(W / 2 + label_img.GetWidth() / 2 + 10 + i * 18);
+    dots[i].SetY(H * 0.88 + label_img.GetHeight() / 2 - 8);
+    if (Math.Int(t / 15) % 4 > i) dots[i].SetOpacity(1); else dots[i].SetOpacity(0.15);
+  }
+}
+Plymouth.SetRefreshFunction(refresh);
+
+fun boot_progress(duration, value) { if (value > progress) progress = value; }
+Plymouth.SetBootProgressFunction(boot_progress);
+
+fun quit() { landed = 1; }
+Plymouth.SetQuitFunction(quit);
+
+// --- password prompt (encrypted disks): "the mothership requests the passphrase"
+entry_img = Image("entry.png"); bullet_img = Image("bullet.png");
+entry = Sprite(entry_img); entry.SetZ(30); entry.SetOpacity(0);
+prompt_sprite = Sprite(); prompt_sprite.SetZ(30);
+bullets = [];
+
+fun display_normal() {
+  entry.SetOpacity(0); prompt_sprite.SetOpacity(0);
+  for (i = 0; bullets[i]; i++) bullets[i].SetOpacity(0);
+  label.SetOpacity(1);
+}
+fun display_password(prompt, count) {
+  label.SetOpacity(0);
+  entry.SetX(W / 2 - entry_img.GetWidth() / 2); entry.SetY(H * 0.86); entry.SetOpacity(1);
+  txt = Image.Text(prompt, 0.91, 0.98, 1, 1, "Comfortaa 16");
+  prompt_sprite.SetImage(txt); prompt_sprite.SetOpacity(1);
+  prompt_sprite.SetX(W / 2 - txt.GetWidth() / 2); prompt_sprite.SetY(H * 0.86 - txt.GetHeight() - 10);
+  for (i = 0; bullets[i]; i++) bullets[i].SetOpacity(0);
+  for (i = 0; i < count && i < 18; i++) {
+    if (!bullets[i]) { bullets[i] = Sprite(bullet_img); bullets[i].SetZ(31); }
+    bullets[i].SetX(W / 2 - entry_img.GetWidth() / 2 + 24 + i * 21);
+    bullets[i].SetY(H * 0.86 + entry_img.GetHeight() / 2 - 10); bullets[i].SetOpacity(1);
+  }
+}
+Plymouth.SetDisplayNormalFunction(display_normal);
+Plymouth.SetDisplayPasswordFunction(display_password);
+
+// --- boot messages (e.g. fsck) shown small and plain
+msg = Sprite(); msg.SetZ(30);
+fun message(text) {
+  m = Image.Text(text, 0.56, 0.72, 0.75, 1, "Comfortaa 12");
+  msg.SetImage(m); msg.SetX(W / 2 - m.GetWidth() / 2); msg.SetY(H * 0.95);
+}
+Plymouth.SetMessageFunction(message);

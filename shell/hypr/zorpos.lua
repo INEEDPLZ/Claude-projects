@@ -14,6 +14,7 @@ local hivectl  = "zorp-hivectl "
 
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 
+hl.env("XCURSOR_THEME", "ZorpCursors")
 hl.env("XCURSOR_SIZE", "28")
 hl.env("HYPRCURSOR_SIZE", "28")
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")

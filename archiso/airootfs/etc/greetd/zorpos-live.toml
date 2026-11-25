@@ -1,0 +1,12 @@
+# Live ISO only: log the live user straight into the Hive; after logout the alien-eye greeter appears.
+# (The installer removes this file and systemd/system/greetd.service.d/zz-live.conf.)
+[terminal]
+vt = 1
+
+[initial_session]
+command = "zorp-session"
+user = "specimen"
+
+[default_session]
+command = "cage -s -m last -- zorp-greeter"
+user = "greeter"

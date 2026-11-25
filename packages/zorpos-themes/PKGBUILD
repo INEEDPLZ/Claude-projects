@@ -1,0 +1,59 @@
+# Maintainer: ZorpOS Mothership Collective
+# ZorpOS theming: GTK3/GTK4 theme, ZorpCursors cursor theme, Firefox skin + alien new-tab page,
+# Plymouth "landing UFO" boot splash. Everything generated from themes/tokens.json (original art).
+# zorp-include: scripts/gen-gtk-theme.py scripts/gen-cursors.py scripts/gen-glyphs.py scripts/gen-plymouth-art.py scripts/gen-aurora.py themes/tokens.json themes/branding themes/firefox themes/plymouth
+pkgname=zorpos-themes
+pkgver=0.5.0
+pkgrel=1
+pkgdesc="ZorpOS themes: GTK, cursors, Firefox skin + new tab, Plymouth landing-UFO splash"
+arch=(any)
+url="https://github.com/ineedplz/claude-projects"
+license=(GPL-3.0-or-later CC-BY-SA-4.0 OFL-1.1)
+depends=(gtk3 gtk4 plymouth firefox)
+makedepends=(python python-cairo xorg-xcursorgen librsvg fontforge)
+install=zorpos-themes.install
+_commit=83c62e30d87daa70216dab6b984d00d20d96d585
+_gf="https://raw.githubusercontent.com/google/fonts/${_commit}/ofl"
+source=("Doto.ttf::${_gf}/doto/Doto%5BROND,wght%5D.ttf"
+        "Comfortaa.ttf::${_gf}/comfortaa/Comfortaa%5Bwght%5D.ttf")
+sha256sums=('6f4fe7d37853b91df3698daa84cde2dbe1c9695d88c986e6510134910337d426'
+            '0fc3f45dc48b614db9c39181502544b37217ecbf8bee2fb35886992bc96c5bd3')
+
+build() {
+  cd "$startdir"
+  python scripts/gen-gtk-theme.py "$srcdir/gtk" >/dev/null
+  python scripts/gen-cursors.py "$srcdir/cursors" >/dev/null
+  python scripts/gen-glyphs.py "$srcdir/Zorpglyph.ttf" >/dev/null
+  python scripts/gen-plymouth-art.py "$srcdir/ply" >/dev/null
+  python scripts/gen-aurora.py wallpaper "$srcdir/ply/background.svg" --w 1920 --h 1080 --seed 7
+  for f in ufo beam pad entry bullet dot background; do
+    rsvg-convert "$srcdir/ply/$f.svg" -o "$srcdir/ply/$f.png"
+  done
+}
+
+package() {
+  local s="$startdir"
+  # GTK
+  install -d "$pkgdir/usr/share/themes"
+  cp -r "$srcdir/gtk/themes/Zorp" "$pkgdir/usr/share/themes/"
+  install -Dm644 "$srcdir/gtk/gtk-4.0/gtk.css" "$pkgdir/etc/skel/.config/gtk-4.0/gtk.css"
+  install -Dm644 "$srcdir/gtk/gtk-4.0/gtk.css" "$pkgdir/usr/share/zorpos/gtk-4.0/gtk.css"
+  # cursors
+  install -d "$pkgdir/usr/share/icons"
+  cp -a "$srcdir/cursors/ZorpCursors" "$pkgdir/usr/share/icons/"
+  # Firefox: policies + autoconfig (installs userChrome.css into the profile, sets the new-tab page)
+  install -Dm644 "$s/themes/firefox/policies.json" "$pkgdir/usr/lib/firefox/distribution/policies.json"
+  install -Dm644 "$s/themes/firefox/autoconfig.js" "$pkgdir/usr/lib/firefox/defaults/pref/autoconfig.js"
+  install -Dm644 "$s/themes/firefox/zorpos.cfg" "$pkgdir/usr/lib/firefox/zorpos.cfg"
+  install -Dm644 "$s/themes/firefox/userChrome.css.in" "$pkgdir/usr/share/zorpos/firefox/userChrome.css"
+  local nt="$pkgdir/usr/share/zorpos/firefox/newtab"
+  install -Dm644 "$s/themes/firefox/newtab/index.html" "$nt/index.html"
+  install -Dm644 "$srcdir/Zorpglyph.ttf" "$nt/Zorpglyph.ttf"   # file:// pages may only load fonts from their own dir
+  install -Dm644 "$srcdir/Doto.ttf" "$nt/Doto.ttf"
+  install -Dm644 "$srcdir/Comfortaa.ttf" "$nt/Comfortaa.ttf"
+  install -Dm644 "$s/themes/branding/zorp-mascot.svg" "$nt/zorpos.svg"
+  # Plymouth
+  local pd="$pkgdir/usr/share/plymouth/themes/zorp"
+  install -Dm644 -t "$pd" "$s/themes/plymouth/zorp/zorp.plymouth" "$s/themes/plymouth/zorp/zorp.script"
+  for f in ufo beam pad entry bullet dot background; do install -Dm644 "$srcdir/ply/$f.png" "$pd/$f.png"; done
+}

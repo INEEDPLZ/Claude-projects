@@ -1,0 +1,5 @@
+#!/bin/sh
+# The login screen. greetd runs: cage -s -m last -- zorp-greeter
+. /usr/lib/zorpos/zorp-env.sh
+export PYTHONPATH=/usr/lib/zorpos/hive${PYTHONPATH:+:$PYTHONPATH}
+exec python3 -m zorphive.greeter "$@"

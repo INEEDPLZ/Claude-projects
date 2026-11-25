@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=ZorpOS
+Description=Zorp lands the mothership's scout saucer while ZorpOS boots.
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/zorp
+ScriptFile=/usr/share/plymouth/themes/zorp/zorp.script

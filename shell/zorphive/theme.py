@@ -37,6 +37,11 @@ window.zorp-app {{ background: radial-gradient(circle at 30% 20%, {teal_deep} 0%
 window.zorp-app headerbar {{ background: linear-gradient(to bottom, {chrome_hi}, {chrome} 50%, {chrome_lo}); color: {void}; }}
 window.zorp-app .pod-body label {{ color: {text}; }}
 window.zorp-app .pod-body label.dim {{ color: {text_dim}; }}
+window.zorp-app entry, window.zorp-app passwordentry, window.zorp-app dropdown > button, window.zorp-app spinbutton {{
+  background: alpha({void}, 0.85); color: {text}; border: 1px solid alpha({aqua}, 0.6); border-radius: 12px; }}
+window.zorp-app entry:focus-within, window.zorp-app passwordentry:focus-within {{ border-color: {acid}; box-shadow: 0 0 10px alpha({acid}, 0.6); }}
+window.zorp-app passwordentry text, window.zorp-app entry text {{ color: {aqua_glow}; }}
+window.zorp-app popover contents {{ background: {abyss}; color: {text}; }}
 .lcd {{ font-family: "{lcd}", monospace; font-weight: 800; color: {aqua_glow};
         text-shadow: 0 0 6px alpha({aqua}, 0.9); }}
 /* glyph rules come after .lcd so alien script wins until translated */

@@ -106,3 +106,18 @@ missing tool gives a readable error.
 ## 20. Tables are "basic", as specified
 A table is an editable pipe table in a monospace block inside the editor. It exports as a real table
 to .docx, .odt and .pdf. A full WYSIWYG grid editor is out of scope for "basic".
+
+## 21. greetd + cage + a Python/GTK4 greeter
+greetd is tiny and protocol-driven. cage gives the greeter a fullscreen kiosk compositor. The greeter
+shares the Hive's GTK4 code and theme, and if anything goes wrong it falls back to a usable login screen.
+ZorpOS points greetd at `/etc/greetd/zorpos.toml` through a systemd drop-in rather than editing the
+greetd package's own config, so updates never conflict.
+
+## 22. Firefox: policies + autoconfig instead of a forked profile
+A shipped profile goes stale and fights Firefox's profile migration. Policies set the prefs, and a small
+autoconfig script installs `userChrome.css` into whatever profile is active, but only while ZorpOS
+owns the file (marker file). User customizations always win.
+
+## 23. Plymouth in the live initramfs, with a text fallback
+The landing-UFO splash runs on the default boot entry. The "LTS, safe graphics" and "speech" entries
+keep a plain text boot so they stay a reliable fallback, and the screen reader needs text.

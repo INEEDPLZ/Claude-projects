@@ -1,0 +1,5 @@
+post_install() {
+  # makes "zorp" the default splash; the initramfs picks it up on the next mkinitcpio run
+  plymouth-set-default-theme zorp 2>/dev/null || true
+}
+post_upgrade() { post_install; }

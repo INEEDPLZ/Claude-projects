@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New transmission</title>
+<style>
+  @font-face { font-family: "Zorpglyph"; src: url("Zorpglyph.ttf"); }
+  @font-face { font-family: "Doto"; src: url("Doto.ttf"); }
+  @font-face { font-family: "Comfortaa"; src: url("Comfortaa.ttf"); }
+  :root { color-scheme: dark; --void:#@VOID@; --abyss:#@ABYSS@; --teal:#@TEAL@; --teal-deep:#@TEAL_DEEP@; --aqua:#@AQUA@;
+          --aqua-glow:#@AQUA_GLOW@; --acid:#@ACID@; --acid-glow:#@ACID_GLOW@; --chrome-hi:#@CHROME_HI@; --chrome:#@CHROME@;
+          --chrome-lo:#@CHROME_LO@; --text:#@TEXT@; --dim:#@TEXT_DIM@; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: "Comfortaa", sans-serif; color: var(--text); overflow: hidden;
+         background: radial-gradient(ellipse at 30% 10%, var(--teal) 0%, var(--teal-deep) 35%, var(--abyss) 65%, var(--void) 100%);
+         display: grid; place-items: center; }
+  .aurora { position: fixed; inset: -20%; pointer-events: none; filter: blur(60px); opacity: .55;
+            background: conic-gradient(from 200deg at 50% 60%, transparent, var(--aqua) 15%, transparent 30%, var(--acid) 45%, transparent 60%);
+            animation: drift 40s linear infinite; }
+  @keyframes drift { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .aurora { animation: none; } }
+  main { position: relative; text-align: center; padding: 16px; }
+  img.zorp { width: 120px; filter: drop-shadow(0 0 18px var(--aqua)); }
+  .clock { font-family: "Zorpglyph", "Comfortaa"; font-size: clamp(64px, 14vw, 150px); color: var(--aqua-glow);
+           letter-spacing: .08em; text-shadow: 0 0 24px var(--aqua), 0 0 4px var(--acid); cursor: default; transition: font-family .2s; }
+  .clock:hover, .clock:focus { font-family: "Doto", monospace; font-weight: 900; }
+  .date { font-family: "Zorpglyph"; color: var(--dim); letter-spacing: .2em; margin-top: -6px; }
+  .date:hover { font-family: "Comfortaa"; letter-spacing: .05em; }
+  form { margin-top: 36px; display: flex; justify-content: center; }
+  input { width: min(560px, 86vw); padding: 14px 24px; border-radius: 999px; font: inherit; font-size: 18px;
+          color: var(--aqua-glow); background: color-mix(in srgb, var(--void) 80%, transparent);
+          border: 1px solid var(--aqua); outline: none; box-shadow: inset 0 2px 8px #0008; }
+  input:focus { border-color: var(--acid); box-shadow: 0 0 16px var(--acid), inset 0 2px 8px #0008; }
+  .hint { margin-top: 18px; color: var(--dim); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+<main>
+  <img class="zorp" src="zorpos.svg" alt="">
+  <div class="clock" id="clock" tabindex="0" title="Hover for Earth time">00:00</div>
+  <div class="date" id="date"></div>
+  <form action="https://duckduckgo.com/" method="get" role="search">
+    <input name="q" placeholder="Scan the Earth web…" autocomplete="off" autofocus aria-label="Search">
+  </form>
+  <div class="hint">Hover the glyphs to translate · ZorpOS</div>
+</main>
+<script>
+  // Same digits either way: the Zorpglyph font draws them as alien numerals; hovering swaps the font.
+  const pad = n => String(n).padStart(2, "0");
+  function tick() {
+    const d = new Date();
+    document.getElementById("clock").textContent = pad(d.getHours()) + ":" + pad(d.getMinutes());
+    document.getElementById("date").textContent = d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+  }
+  tick(); setInterval(tick, 1000);
+</script>
+</body>
+</html>

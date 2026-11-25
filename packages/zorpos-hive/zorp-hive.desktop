@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=The Hive
+Comment=ZorpOS alien desktop (Hyprland). Super+Shift+E for Earthling Mode.
+Exec=/usr/bin/zorp-session
+Type=Application
+DesktopNames=Hyprland
