@@ -1,0 +1,11 @@
+NAME="ZorpOS"
+PRETTY_NAME="ZorpOS (Live Specimen)"
+ID=zorpos
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;47;211;208"
+HOME_URL="https://github.com/ineedplz/claude-projects"
+DOCUMENTATION_URL="https://github.com/ineedplz/claude-projects/tree/main/docs"
+SUPPORT_URL="https://wiki.archlinux.org/"
+BUG_REPORT_URL="https://github.com/ineedplz/claude-projects/issues"
+LOGO=zorpos

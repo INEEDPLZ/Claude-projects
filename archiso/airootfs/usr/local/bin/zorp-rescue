@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# ZorpOS recovery guide. Plain English, no glyphs. Weird must never mean bricked.
+cat <<'TXT'
+ZORPOS RECOVERY (Earthling edition)
+===================================
+
+1. Get a text console on an installed system
+   - At the boot menu pick "ZorpOS (LTS kernel, safe graphics)" - linux-lts, nomodeset.
+   - Or press "e" on any entry and append:   systemd.unit=multi-user.target
+     That skips the graphical greeter entirely and gives you TTY logins.
+   - Already in the desktop and it's stuck?   Ctrl+Alt+F3   (any of F2-F6).
+
+2. Turn the alien shell off (from a TTY)
+   - zorp-escape-hatch            explains every escape route
+   - Earthling Mode for your user: touch ~/.config/zorpos/earthling
+   - Disable the graphical login:  sudo systemctl disable greetd && sudo reboot
+
+3. Repair a system that will not boot (from this live ISO)
+   lsblk -f                                   # find your root (and EFI) partition
+   mount /dev/<root> /mnt                     # e.g. /dev/nvme0n1p2
+   mount /dev/<efi>  /mnt/boot                # if you have a separate ESP
+   arch-chroot /mnt
+     pacman -Syu                              # finish an interrupted upgrade
+     mkinitcpio -P                            # rebuild initramfs for all kernels
+     bootctl install   # or: grub-install && grub-mkconfig -o /boot/grub/grub.cfg
+   exit; umount -R /mnt; reboot
+
+4. Everything underneath is Arch Linux. The Arch Wiki applies:
+   https://wiki.archlinux.org/title/General_troubleshooting
+TXT

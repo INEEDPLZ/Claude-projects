@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+cat <<'TXT'
+HOW TO ESCAPE THE WEIRDNESS
+===========================
+  Super+Shift+E     Earthling Mode: English labels, a normal dock, normal workspaces
+                    (also a button inside the Mothership Eye, and offered at first boot)
+  Ctrl+Alt+F3       a plain text console, always
+  Boot menu         "LTS kernel, safe graphics" entry = known-good fallback
+  Kernel param      zorp.earthling=1     forces Earthling Mode for that boot
+  Kernel param      systemd.unit=multi-user.target   no graphics at all
+
+Phase note: the Hive desktop arrives in a later build; this ISO is the TTY base.
+TXT

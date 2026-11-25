@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Build the ZorpOS ISO. Picks a builder automatically:
+#   native  - Arch host with archiso installed          (fastest)
+#   podman / docker - archlinux:latest, --privileged      (any Linux with a container engine)
+#   chroot  - downloads the official Arch bootstrap tarball into build/archroot (any Linux, root only)
+# Override with ZORP_BUILDER=native|podman|docker|chroot. Must run as root (mkarchiso requires it).
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+OUT="$ROOT/out"; WORK="$ROOT/build/work"; MIRROR="${ZORP_MIRROR:-https://geo.mirror.pkgbuild.com}"
+BUILDER="${ZORP_BUILDER:-}"
+[[ $EUID -eq 0 ]] || { echo "run as root (sudo make iso)"; exit 1; }
+
+if [[ -z $BUILDER ]]; then
+  if command -v mkarchiso >/dev/null; then BUILDER=native
+  elif command -v podman >/dev/null; then BUILDER=podman
+  elif command -v docker >/dev/null && docker info >/dev/null 2>&1; then BUILDER=docker
+  else BUILDER=chroot; fi
+fi
+echo ">> builder: $BUILDER"
+
+inner='set -e; cd /zorp
+  pacman -Sy --noconfirm --needed archiso librsvg python >/dev/null
+  scripts/prepare-profile.sh /zorp/build/profile
+  rm -rf /zorp/build/work
+  mkarchiso -v -r -w /zorp/build/work -o /zorp/out /zorp/build/profile'
+
+case $BUILDER in
+  native)
+    "$ROOT/scripts/prepare-profile.sh" "$ROOT/build/profile"
+    rm -rf "$WORK"
+    mkarchiso -v -r -w "$WORK" -o "$OUT" "$ROOT/build/profile" ;;
+  podman|docker)
+    $BUILDER run --rm --privileged -e ZORP_FAST="${ZORP_FAST:-0}" -v "$ROOT:/zorp" docker.io/archlinux/archlinux:latest \
+      bash -c "pacman-key --init >/dev/null; pacman-key --populate >/dev/null; $inner" ;;
+  chroot)
+    AR="$ROOT/build/archroot"
+    if [[ ! -x $AR/usr/bin/pacman ]]; then
+      mkdir -p "$ROOT/build"
+      curl -fL --retry 3 -o "$ROOT/build/bootstrap.tar.zst" "$MIRROR/iso/latest/archlinux-bootstrap-x86_64.tar.zst"
+      tar --zstd -xf "$ROOT/build/bootstrap.tar.zst" -C "$ROOT/build" --numeric-owner
+      mv "$ROOT/build/root.x86_64" "$AR"
+      echo "Server = $MIRROR/\$repo/os/\$arch" > "$AR/etc/pacman.d/mirrorlist"
+      cp -L /etc/resolv.conf "$AR/etc/resolv.conf"
+      # trust an extra CA if this host sits behind a TLS-inspecting proxy
+      [[ -n ${ZORP_EXTRA_CA:-} ]] && cp "$ZORP_EXTRA_CA" "$AR/etc/ca-certificates/trust-source/anchors/extra.crt"
+    fi
+    cleanup() { umount -R "$AR/zorp" "$AR/proc" "$AR/sys" "$AR/dev" "$AR" 2>/dev/null || true; }
+    trap cleanup EXIT
+    mountpoint -q "$AR" || mount --bind "$AR" "$AR"
+    mount -t proc proc "$AR/proc"; mount --rbind /sys "$AR/sys"; mount --rbind /dev "$AR/dev"
+    mkdir -p "$AR/zorp"; mount --bind "$ROOT" "$AR/zorp"
+    env_pass=$(env | grep -iE '^(https?|no)_proxy=' | sed "s/^/export /;s/=/='/;s/$/'/" || true)
+    chroot "$AR" /bin/bash -c "$env_pass
+      export ZORP_FAST='${ZORP_FAST:-0}'
+      update-ca-trust
+      [[ -d /etc/pacman.d/gnupg ]] || { pacman-key --init; pacman-key --populate archlinux; } >/dev/null
+      $inner" ;;
+  *) echo "unknown builder $BUILDER"; exit 1 ;;
+esac
+ls -lh "$OUT"/*.iso
