@@ -49,9 +49,11 @@ case $BUILDER in
     cleanup() { umount -R "$AR/zorp" 2>/dev/null || true; }
     trap cleanup EXIT
     mountpoint -q "$AR" || mount --bind "$AR" "$AR"
-    mountpoint -q "$AR/proc" || mount -t proc proc "$AR/proc"
-    mountpoint -q "$AR/sys"  || mount --rbind /sys "$AR/sys"
-    mountpoint -q "$AR/dev"  || mount --rbind /dev "$AR/dev"
+    # verify by content, not mountpoint: stale/lazily-unmounted binds can still look mounted
+    [[ -e "$AR/proc/self/fd" ]] || mount -t proc proc "$AR/proc"
+    [[ -d "$AR/sys/class" ]]    || mount --rbind /sys "$AR/sys"
+    [[ -e "$AR/dev/null" && -e "$AR/dev/fd" ]] || mount --rbind /dev "$AR/dev"
+    [[ -w "$AR/dev/shm" ]] || mount -t tmpfs -o mode=1777 shm "$AR/dev/shm"
     mkdir -p "$AR/zorp"
     # a stale (empty) bind mount can linger after lazy unmounts: verify the repo is really visible
     if [[ ! -x "$AR/zorp/scripts/build-iso.sh" ]]; then
