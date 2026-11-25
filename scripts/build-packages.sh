@@ -19,6 +19,8 @@ if (( $# )); then ORDER=("$@"); fi
 
 python3 "$ROOT/scripts/gen-tokens.py" >/dev/null
 id zorpbuild &>/dev/null || useradd -r -m -d /var/lib/zorpbuild -s /bin/bash zorpbuild
+# Arch doesn't support partial upgrades: bring the build root fully up to date before resolving deps
+pacman -Syu --noconfirm >/dev/null
 pacman -S --noconfirm --needed base-devel git >/dev/null
 mkdir -p "$REPO" "$STAGE"; chown zorpbuild: "$REPO" "$STAGE"
 
