@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Specimen Archive
+GenericName=File Manager
+Comment=Browse your specimens (files). Folders are cocoons.
+Exec=zorp-specimen-archive %U
+Icon=folder
+Type=Application
+Categories=System;FileManager;
+MimeType=inode/directory;

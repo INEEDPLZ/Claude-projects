@@ -1,5 +1,7 @@
+aisleriot
 alsa-firmware
 alsa-utils
+amberol
 amd-ucode
 arch-install-scripts
 b43-fwcutter
@@ -10,6 +12,8 @@ bind
 bolt
 brltty
 btrfs-progs
+celluloid
+chromium-bsu
 clonezilla
 cryptsetup
 darkhttpd
@@ -29,10 +33,14 @@ exfatprogs
 f2fs-tools
 fastfetch
 fatresize
+firefox
 foot-terminfo
 fsarchiver
 ghostty-terminfo
 git
+gnome-2048
+gnome-chess
+gnome-mines
 gpart
 gpm
 gptfdisk
@@ -75,6 +83,7 @@ mkinitcpio-archiso
 mkinitcpio-nfs-utils
 mmc-utils
 modemmanager
+mpv
 mtools
 nano
 nbd
@@ -96,7 +105,9 @@ openvpn
 partclone
 parted
 partimage
+pavucontrol
 pcsclite
+pingus
 pipewire
 pipewire-alsa
 pipewire-jack
@@ -106,6 +117,7 @@ ppp
 pptpclient
 pv
 qemu-guest-agent
+quadrapassel
 refind
 reflector
 rsync
@@ -118,9 +130,11 @@ smartmontools
 sof-firmware
 squashfs-tools
 sudo
+supertux
 syslinux
 systemd-resolvconf
 tcpdump
+teeworlds
 terminus-font
 testdisk
 tmux
@@ -142,9 +156,11 @@ wireless_tools
 wireplumber
 wpa_supplicant
 wvdial
+xdg-user-dirs
 xdg-utils
 xfsprogs
 xl2tpd
 zip
 zorpos-gaming
+zorpos-hive
 zsh

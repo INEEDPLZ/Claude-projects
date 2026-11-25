@@ -1,0 +1,3 @@
+#!/bin/sh
+# Specimen Archive = Nautilus wearing the Zorp icon theme (folders are cocoons).
+exec nautilus --new-window "${@:-$HOME}"

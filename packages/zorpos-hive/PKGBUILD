@@ -1,0 +1,71 @@
+# Maintainer: ZorpOS Mothership Collective
+# The Hive desktop shell + Hyprland config + Personalize Organism + Specimen Archive + Zorp icons
+# + the Zorpglyph alien font. Built from this repo's shell/ and scripts/.
+# zorp-include: shell scripts/gen-glyphs.py scripts/gen-icons.py scripts/gen-aurora.py themes/tokens.json themes/branding
+pkgname=zorpos-hive
+pkgver=0.3.0
+pkgrel=1
+pkgdesc="The Hive: ZorpOS alien desktop shell on Hyprland (with Earthling Mode)"
+arch=(any)
+url="https://github.com/ineedplz/claude-projects"
+license=(GPL-3.0-or-later)
+depends=(
+  hyprland hyprpolkitagent xdg-desktop-portal-hyprland xdg-desktop-portal-gtk xorg-xwayland qt6-wayland
+  python python-gobject python-cairo python-psutil gtk4 gtk4-layer-shell playerctl lm_sensors
+  libnotify mako foot fuzzel nautilus gvfs librsvg grim slurp wl-clipboard brightnessctl wireplumber
+  adwaita-icon-theme noto-fonts noto-fonts-emoji zorpos-fonts dconf
+)
+makedepends=(fontforge python)
+install=zorpos-hive.install
+source=(zorp-hive-autostart.sh gtk-settings.ini dconf-zorpos mako.conf fuzzel.ini foot.ini
+        os.zorp.PersonalizeOrganism.desktop os.zorp.SpecimenArchive.desktop)
+sha256sums=(SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP)
+
+build() {
+  cd "$startdir"
+  python scripts/gen-glyphs.py "$srcdir/Zorpglyph.ttf" >/dev/null
+  python scripts/gen-icons.py "$srcdir/icons" >/dev/null
+  python - "$srcdir" <<'PY'
+import json, pathlib, sys
+c = json.loads(pathlib.Path("themes/tokens.json").read_text())["color"]
+lines = ["-- generated from themes/tokens.json", "return {"] + [f'  ["{k}"] = "{v.lstrip("#")}",' for k, v in c.items()] + ["}"]
+pathlib.Path(sys.argv[1], "zorpos_tokens.lua").write_text("\n".join(lines) + "\n")
+PY
+}
+
+package() {
+  local s="$startdir"
+  # shell (python package) + launchers
+  install -d "$pkgdir/usr/lib/zorpos/hive"
+  cp -r "$s/shell/zorphive" "$pkgdir/usr/lib/zorpos/hive/"
+  find "$pkgdir/usr/lib/zorpos/hive" -name '__pycache__' -prune -exec rm -rf {} +
+  for b in zorp-hive zorp-hivectl zorp-organism zorp-specimen-archive; do
+    install -Dm755 "$s/shell/bin/$b" "$pkgdir/usr/bin/$b"
+  done
+  sed -i 's|^exec python3 -m|export PYTHONPATH=/usr/lib/zorpos/hive${PYTHONPATH:+:$PYTHONPATH}\nexec python3 -m|' \
+    "$pkgdir/usr/bin/zorp-hive" "$pkgdir/usr/bin/zorp-organism"
+  install -Dm755 "$s/scripts/gen-aurora.py" "$pkgdir/usr/lib/zorpos/scripts/gen-aurora.py"
+  install -Dm644 "$s/themes/tokens.json" "$pkgdir/usr/lib/zorpos/themes/tokens.json"   # gen-aurora looks here
+  # Hyprland config
+  install -Dm644 "$s/shell/hypr/zorpos.lua"     "$pkgdir/usr/share/zorpos/hypr/zorpos.lua"
+  install -Dm644 "$srcdir/zorpos_tokens.lua"    "$pkgdir/usr/share/zorpos/hypr/zorpos_tokens.lua"
+  install -Dm644 "$s/shell/hypr/hyprland.lua"   "$pkgdir/usr/share/zorpos/hypr/hyprland.user.lua"
+  install -Dm644 "$s/shell/hypr/hyprland.lua"   "$pkgdir/etc/skel/.config/hypr/hyprland.lua"
+  # fonts, icons, apps, session glue
+  install -Dm644 "$srcdir/Zorpglyph.ttf" "$pkgdir/usr/share/fonts/zorpos/Zorpglyph.ttf"
+  install -d "$pkgdir/usr/share/icons"
+  cp -r "$srcdir/icons/Zorp" "$pkgdir/usr/share/icons/Zorp"
+  install -Dm644 -t "$pkgdir/usr/share/applications" os.zorp.PersonalizeOrganism.desktop os.zorp.SpecimenArchive.desktop
+  install -Dm644 zorp-hive-autostart.sh "$pkgdir/etc/profile.d/zorp-hive-autostart.sh"
+  install -Dm644 gtk-settings.ini "$pkgdir/etc/skel/.config/gtk-4.0/settings.ini"
+  install -Dm644 gtk-settings.ini "$pkgdir/etc/skel/.config/gtk-3.0/settings.ini"
+  install -Dm644 dconf-zorpos "$pkgdir/etc/dconf/db/local.d/00-zorpos"
+  install -Dm644 /dev/stdin "$pkgdir/etc/dconf/profile/user" <<<$'user-db:user\nsystem-db:local'
+  # per-user defaults (the apps' own packages own their /etc/xdg configs)
+  install -Dm644 mako.conf   "$pkgdir/etc/skel/.config/mako/config"
+  install -Dm644 fuzzel.ini  "$pkgdir/etc/skel/.config/fuzzel/fuzzel.ini"
+  install -Dm644 foot.ini    "$pkgdir/etc/skel/.config/foot/foot.ini"
+  install -d "$pkgdir/usr/share/zorpos/skel"
+  cp -a "$pkgdir/etc/skel/.config" "$pkgdir/usr/share/zorpos/skel/"   # for zorp-hive --seed-config
+  install -Dm644 "$s/themes/branding/zorp-mascot.svg" "$pkgdir/usr/share/pixmaps/zorpos.svg"
+}

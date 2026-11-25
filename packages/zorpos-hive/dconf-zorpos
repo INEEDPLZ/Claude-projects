@@ -1,0 +1,4 @@
+[org/gnome/desktop/interface]
+icon-theme='Zorp'
+color-scheme='prefer-dark'
+font-name='Comfortaa 11'

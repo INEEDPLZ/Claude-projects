@@ -14,10 +14,16 @@ for p in steam gamescope gamemode lib32-gamemode mangohud lib32-mangohud wine-st
 done
 
 shopt -s nullglob
-icd64=(/usr/share/vulkan/icd.d/*x86_64*.json /usr/share/vulkan/icd.d/nvidia_icd.json)
-icd32=(/usr/share/vulkan/icd.d/*i686*.json /usr/share/vulkan/icd.d/*i386*.json)
-(( ${#icd64[@]} )) && ok "64-bit Vulkan drivers: $(basename -a "${icd64[@]}" | tr '\n' ' ')" || bad "no 64-bit Vulkan driver"
-(( ${#icd32[@]} )) || has lib32-nvidia-utils && ok "32-bit Vulkan drivers present" || bad "no 32-bit Vulkan driver (lib32-vulkan-* / lib32-nvidia-utils)"
+# Mesa >= 26 ships one arch-neutral manifest per driver (radeon_icd.json); the loader resolves
+# libvulkan_<drv>.so from /usr/lib or /usr/lib32. So check the driver libraries per arch.
+icds=(/usr/share/vulkan/icd.d/*.json)
+lib64=(/usr/lib/libvulkan_{radeon,intel,intel_hasvk,nouveau}.so /usr/lib/libGLX_nvidia.so.0)
+lib32=(/usr/lib32/libvulkan_{radeon,intel,intel_hasvk,nouveau}.so /usr/lib32/libGLX_nvidia.so.0)
+have64=(); for f in "${lib64[@]}"; do [[ -e $f ]] && have64+=("$(basename "$f")"); done
+have32=(); for f in "${lib32[@]}"; do [[ -e $f ]] && have32+=("$(basename "$f")"); done
+(( ${#icds[@]} )) && ok "Vulkan ICD manifests: $(basename -a "${icds[@]}" | paste -sd' ')" || bad "no Vulkan ICD manifests"
+(( ${#have64[@]} )) && ok "64-bit Vulkan drivers: ${have64[*]}" || bad "no 64-bit Vulkan driver"
+(( ${#have32[@]} )) && ok "32-bit Vulkan drivers: ${have32[*]}" || bad "no 32-bit Vulkan driver (lib32-vulkan-* / lib32-nvidia-utils)"
 if command -v vulkaninfo >/dev/null; then
   gpus=$(vulkaninfo --summary 2>/dev/null | awk -F'= ' '/deviceName/{print $2}' | paste -sd, -)
   [[ -n $gpus ]] && ok "Vulkan devices: $gpus" || meh "vulkaninfo found no devices (normal in a VM without 3D)"

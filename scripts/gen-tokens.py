@@ -4,6 +4,7 @@
 Outputs (all in themes/generated/, git-ignored):
   tokens.css   -> CSS custom properties (GTK4/AGS/Firefox/web)
   tokens.sh    -> shell vars ZORP_<NAME>=#rrggbb (build scripts, syslinux)
+  tokens.lua   -> Lua table name -> rrggbb (Hyprland config)
   vt-params    -> kernel cmdline vt.default_{red,grn,blu}=... for the TTY palette
 """
 import json
@@ -36,6 +37,12 @@ for k, v in colors.items():
 for k, v in tokens["font"].items():
     sh.append(f"ZORP_FONT_{k.upper()}='{v}'")
 (out / "tokens.sh").write_text("\n".join(sh) + "\n")
+
+lua = ["-- generated from themes/tokens.json - do not edit", "return {"]
+for k, v in colors.items():
+    lua.append(f'  ["{k}"] = "{v.lstrip("#")}",')
+lua.append("}")
+(out / "tokens.lua").write_text("\n".join(lua) + "\n")
 
 pal = [rgb(c) for c in tokens["tty"]["palette"]]
 if len(pal) != 16:

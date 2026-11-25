@@ -9,3 +9,9 @@ fi
 install -Dm440 /dev/stdin /etc/sudoers.d/10-zorpos-live <<<'specimen ALL=(ALL:ALL) NOPASSWD: ALL'
 cp /etc/motd /home/specimen/.zorp-motd 2>/dev/null || true
 chown -R specimen:specimen /home/specimen
+
+# Hive defaults for the live user (skel is copied at useradd above; refresh in case packages landed later)
+cp -rn /etc/skel/.config /home/specimen/ 2>/dev/null || true
+chown -R specimen:specimen /home/specimen
+dconf update 2>/dev/null || true
+gtk-update-icon-cache -q -f /usr/share/icons/Zorp 2>/dev/null || true

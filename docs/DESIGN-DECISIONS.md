@@ -68,3 +68,25 @@ source would add a large, fast-moving dependency. Python + GTK4 + `gtk4-layer-sh
 packages. They're the same stack as the Docking splash, so ZorpOS's UI code shares one toolkit.
 Hyprland stays the compositor (with jelly animations, see #2). The shell talks to it over
 Hyprland's IPC socket.
+
+## 13. Hyprland 0.57 uses a Lua config
+Hyprland switched from hyprlang to Lua (`hl.config`, `hl.bind`, `hl.dsp.*`). ZorpOS's config
+(`shell/hypr/zorpos.lua`) is written for it and checked with `Hyprland --verify-config`. Jelly is done
+with Hyprland's native **spring** curves (underdamped: they overshoot and settle), so it needs no plugin.
+
+## 14. Glyph labels swap fonts, not text
+Zorpglyph maps every Latin letter and digit to an invented alien glyph. A label's text is always real
+English; "translation" only switches the font. Screen readers, copy-paste and search keep working,
+and Earthling Mode is just a CSS class.
+
+## 15. Specimen Archive is Nautilus + an icon theme, not a fork
+Forking a file manager means owning a file manager. Nautilus wearing the original "Zorp" icon theme
+(cocoon folders) gets the look while upstream keeps doing the hard parts (gvfs, trash, search).
+
+## 16. Minimize = special workspace
+Hyprland has no minimize. Jars are its hidden `special:jar` workspace. A `window.minimize` hook routes
+apps' own minimize buttons there, and the shelf shows what's inside.
+
+## 17. Session start before the greeter
+Phase 5 brings the greetd eye greeter. Until then, a tty1 login starts Hyprland from
+`/etc/profile.d`, and a crash or exit drops back to a working shell, never a black screen.

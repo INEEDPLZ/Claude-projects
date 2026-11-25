@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Personalize Organism
+GenericName=Settings
+Comment=Tune your ZorpOS organism
+Exec=zorp-organism
+Icon=zorpos
+Type=Application
+Categories=Settings;

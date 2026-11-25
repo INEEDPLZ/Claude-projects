@@ -3,8 +3,8 @@
 An Arch Linux–based distro that crash-landed from another planet. Its builders copied
 Earth's mid-2000s "glossy future" design and got it slightly wrong. Arch underneath, alien on top.
 
-> **Status: Phase 2 of 6.** This is a bootable, branded live ISO with a TTY base system and the full
-> gaming stack ([GAMING.md](GAMING.md)). The Hive desktop, Xenoscribe, theming and installer arrive in later phases
+> **Status: Phase 3 of 6.** This is a bootable live ISO with the full gaming stack ([GAMING.md](GAMING.md)) and
+> **The Hive** alien desktop with Earthling Mode ([HIVE.md](HIVE.md)). Xenoscribe, the theming pass and the installer arrive in later phases
 > (see [ROADMAP.md](ROADMAP.md)).
 
 ## Repo layout
@@ -13,7 +13,7 @@ Earth's mid-2000s "glossy future" design and got it slightly wrong. Arch underne
 |---|---|
 | `archiso/` | archiso profile (based on the official `releng` profile) |
 | `packages/` | PKGBUILDs built into the local `[zorpos]` repo (see [AUR.md](AUR.md)) |
-| `shell/` | The Hive desktop shell (Phase 3) |
+| `shell/` | The Hive desktop shell + Hyprland config ([HIVE.md](HIVE.md)) |
 | `apps/` | Xenoscribe and other first-party apps (Phase 4) |
 | `themes/tokens.json` | **the only place theme colors are defined** |
 | `themes/branding/` | original SVG art (mascot, …) |
@@ -64,8 +64,13 @@ It uses KVM if `/dev/kvm` is writable and falls back to TCG otherwise (slow: all
 
 ## Live session
 
-tty1 auto-logs in as **`specimen`** (no password, passwordless sudo, live ISO only). Steam refuses to run as
-root. Root can log in on tty2–6 with an empty password. Run `zorp-gamer-hive` to boot into Steam Big Picture.
+tty1 auto-logs in as **`specimen`** (no password, passwordless sudo, live ISO only) and starts **the Hive**
+(Hyprland). The first boot offers Hive Mode or Earthling Mode. Root can log in on tty2–6 with an empty
+password. From a TTY, `zorp-gamer-hive` boots into Steam Big Picture.
+
+Included apps: Firefox, Amberol (music), Celluloid/mpv (video), Personalize Organism (settings), Specimen
+Archive (files), foot (terminal), Steam + ProtonUp-Qt, and games: Chromium B.S.U., SuperTux, Pingus,
+Teeworlds, Mines, 2048, Quadrapassel, Chess and Aisleriot solitaire.
 
 ## Escaping the weirdness (and recovery)
 
@@ -75,8 +80,9 @@ Weird must never mean bricked. These always work:
 - **`zorp-rescue`**: recovery guide (chroot from the live ISO, rebuild initramfs, reinstall the bootloader).
 - **`zorp-escape-hatch`**: every way out of the alien UI.
 - **Boot param `systemd.unit=multi-user.target`**: no graphics at all.
-- **Boot param `zorp.earthling=1`**: forces Earthling Mode (honored from Phase 3).
-- **Super+Shift+E**: Earthling Mode toggle (Phase 3).
+- **Boot param `zorp.earthling=1`**: forces Earthling Mode.
+- **Boot param `zorp.tty=1`**: don't start the Hive on login.
+- **Super+Shift+E**: Earthling Mode toggle. **Super+D**: plain launcher. **Super+Shift+Q**: leave Hyprland.
 
 ## Theming rule
 

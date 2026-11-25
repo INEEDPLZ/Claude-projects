@@ -1,7 +1,7 @@
 # Maintainer: ZorpOS Mothership Collective
 # Metapackage + config for the ZorpOS gaming stack (SteamOS-style compatibility).
 pkgname=zorpos-gaming
-pkgver=0.2.0
+pkgver=0.2.1
 pkgrel=1
 pkgdesc="ZorpOS gaming stack: Steam, Proton tooling, gamescope, gamemode, MangoHud vitals, drivers, controllers"
 arch=(any)
