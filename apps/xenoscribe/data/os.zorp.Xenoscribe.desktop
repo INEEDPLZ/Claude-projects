@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Xenoscribe
+GenericName=Word Processor
+Comment=Write transmissions. Imports and exports .docx, .odt, .pdf and .md
+Exec=xenoscribe %F
+Icon=os.zorp.Xenoscribe
+Type=Application
+Categories=Office;WordProcessor;
+MimeType=application/x-zorp-transmission;application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.oasis.opendocument.text;text/markdown;
+Keywords=document;writer;docx;odt;transmission;
+StartupNotify=true

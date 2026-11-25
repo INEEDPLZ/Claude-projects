@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-zorp-transmission">
+    <comment>Zorp transmission (Xenoscribe document)</comment>
+    <sub-class-of type="application/zip"/>
+    <glob pattern="*.zorp"/>
+    <icon name="os.zorp.Xenoscribe"/>
+  </mime-type>
+</mime-info>

@@ -2,3 +2,4 @@
 /out/
 /themes/generated/
 *.iso
+/apps/xenoscribe/target/

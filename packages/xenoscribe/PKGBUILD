@@ -1,0 +1,33 @@
+# Maintainer: ZorpOS Mothership Collective
+# Xenoscribe: the ZorpOS word processor (Rust + GTK4). Built from this repo's apps/xenoscribe.
+# zorp-include: apps/xenoscribe/Cargo.toml apps/xenoscribe/Cargo.lock apps/xenoscribe/src apps/xenoscribe/data themes/tokens.json
+pkgname=xenoscribe
+pkgver=0.4.0
+pkgrel=1
+pkgdesc="Xenoscribe: ZorpOS word processor (.zorp transmissions; imports/exports docx, odt, pdf, md)"
+arch=(x86_64)
+url="https://github.com/ineedplz/claude-projects"
+license=(GPL-3.0-or-later)
+depends=(gtk4 hunspell hunspell-en_us pandoc-cli typst poppler noto-fonts zorpos-fonts)
+makedepends=(cargo)
+options=(!lto !debug)
+
+prepare() {
+  cd "$startdir/apps/xenoscribe"
+  export CARGO_HOME="$srcdir/cargo-home"
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+  cd "$startdir/apps/xenoscribe"
+  export CARGO_HOME="$srcdir/cargo-home" CARGO_TARGET_DIR="$srcdir/target"
+  cargo build --frozen --release
+}
+
+package() {
+  local d="$startdir/apps/xenoscribe/data"
+  install -Dm755 "$srcdir/target/release/xenoscribe" "$pkgdir/usr/bin/xenoscribe"
+  install -Dm644 "$d/os.zorp.Xenoscribe.desktop" "$pkgdir/usr/share/applications/os.zorp.Xenoscribe.desktop"
+  install -Dm644 "$d/os.zorp.Xenoscribe.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/os.zorp.Xenoscribe.svg"
+  install -Dm644 "$d/xenoscribe-mime.xml" "$pkgdir/usr/share/mime/packages/xenoscribe.xml"
+}

@@ -3,8 +3,9 @@
 An Arch Linux–based distro that crash-landed from another planet. Its builders copied
 Earth's mid-2000s "glossy future" design and got it slightly wrong. Arch underneath, alien on top.
 
-> **Status: Phase 3 of 6.** This is a bootable live ISO with the full gaming stack ([GAMING.md](GAMING.md)) and
-> **The Hive** alien desktop with Earthling Mode ([HIVE.md](HIVE.md)). Xenoscribe, the theming pass and the installer arrive in later phases
+> **Status: Phase 4 of 6.** This is a bootable live ISO with the full gaming stack ([GAMING.md](GAMING.md)) and
+> **The Hive** alien desktop with Earthling Mode ([HIVE.md](HIVE.md)) and the **Xenoscribe** word processor
+> ([XENOSCRIBE.md](XENOSCRIBE.md)). The theming pass and the installer arrive in later phases
 > (see [ROADMAP.md](ROADMAP.md)).
 
 ## Repo layout
@@ -14,7 +15,7 @@ Earth's mid-2000s "glossy future" design and got it slightly wrong. Arch underne
 | `archiso/` | archiso profile (based on the official `releng` profile) |
 | `packages/` | PKGBUILDs built into the local `[zorpos]` repo (see [AUR.md](AUR.md)) |
 | `shell/` | The Hive desktop shell + Hyprland config ([HIVE.md](HIVE.md)) |
-| `apps/` | Xenoscribe and other first-party apps (Phase 4) |
+| `apps/` | Xenoscribe word processor (Rust + GTK4) |
 | `themes/tokens.json` | **the only place theme colors are defined** |
 | `themes/branding/` | original SVG art (mascot, …) |
 | `scripts/` | build, asset and VM-test tooling |
@@ -68,7 +69,7 @@ tty1 auto-logs in as **`specimen`** (no password, passwordless sudo, live ISO on
 (Hyprland). The first boot offers Hive Mode or Earthling Mode. Root can log in on tty2–6 with an empty
 password. From a TTY, `zorp-gamer-hive` boots into Steam Big Picture.
 
-Included apps: Firefox, Amberol (music), Celluloid/mpv (video), Personalize Organism (settings), Specimen
+Included apps: Xenoscribe (word processor), Firefox, Amberol (music), Celluloid/mpv (video), Personalize Organism (settings), Specimen
 Archive (files), foot (terminal), Steam + ProtonUp-Qt, and games: Chromium B.S.U., SuperTux, Pingus,
 Teeworlds, Mines, 2048, Quadrapassel, Chess and Aisleriot solitaire.
 

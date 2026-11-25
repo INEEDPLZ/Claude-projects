@@ -90,3 +90,19 @@ apps' own minimize buttons there, and the shelf shows what's inside.
 ## 17. Session start before the greeter
 Phase 5 brings the greetd eye greeter. Until then, a tty1 login starts Hyprland from
 `/etc/profile.d`, and a crash or exit drops back to a working shell, never a black screen.
+
+## 18. Xenoscribe in Rust + GTK4
+**Decided (owner, Phase 4).** gtk4-rs matches the system GTK 4.24 and gives one fast static binary
+(about 600 KB packaged). The document model, which turns the buffer into Markdown and back, gets the
+compiler's checking. Spellcheck is a ~60-line direct binding to libhunspell rather than a wrapper crate,
+so there are no binding-version mismatches with GTK.
+
+## 19. Pandoc for Earth formats; typst for PDF
+Writing .docx and .odt support by hand would be a project of its own, so pandoc (official repo) does
+it. PDF export goes through pandoc's typst engine instead of LaTeX, saving roughly 1 GB on the ISO. PDF
+import is text-only because PDFs carry no editable structure. All of these are subprocesses, so a
+missing tool gives a readable error.
+
+## 20. Tables are "basic", as specified
+A table is an editable pipe table in a monospace block inside the editor. It exports as a real table
+to .docx, .odt and .pdf. A full WYSIWYG grid editor is out of scope for "basic".
