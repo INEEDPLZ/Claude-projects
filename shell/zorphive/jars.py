@@ -10,7 +10,7 @@ import time
 import cairo
 from gi.repository import GLib, Gtk
 
-from . import apps as A
+from . import apps as A, motion
 from . import hypr, layer
 from .glyphs import GlyphLabel
 from .theme import rgba
@@ -40,7 +40,7 @@ class Jar(Gtk.Box):
         lbl = GlyphLabel((client.get("class") or "specimen")[:12], hover_target=btn)
         lbl.add_css_class("pod-label")
         self.append(lbl)
-        self.area.add_tick_callback(lambda *_: (self.area.queue_draw(), True)[1])
+        motion.redraw(self.area)
 
     def _draw(self, _a, cr, w, h):
         t = time.monotonic() - self.t0

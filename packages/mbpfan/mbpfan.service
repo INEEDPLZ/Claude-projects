@@ -1,0 +1,15 @@
+[Unit]
+Description=MacBook fan control (mbpfan)
+# only on real Apple hardware: the SMC appears there (applesmc loads itself via DMI)
+ConditionPathExists=/sys/devices/platform/applesmc.768
+After=systemd-modules-load.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/mbpfan -f
+ExecReload=/usr/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

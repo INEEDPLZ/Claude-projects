@@ -9,6 +9,13 @@ Earth's mid-2000s "glossy future" design and got it slightly wrong. Arch underne
 > boot splash, alien-eye login, GTK, cursors and Firefox ([THEMING.md](THEMING.md)).
 > Why things are the way they are: [DESIGN-DECISIONS.md](DESIGN-DECISIONS.md).
 
+## Editions
+
+| Edition | For | Build | Docs |
+|---|---|---|---|
+| ZorpOS | any modern x86-64 PC | `sudo make iso` | this page |
+| **ZorpOS MacBook** | Intel MacBook Pro 2013–2015 (Retina, Iris graphics): Broadcom Wi-Fi, fan control, trackpad, Mac keys, lighter effects | `sudo make iso-macbook` | [editions/macbook](../editions/macbook/README.md) |
+
 ## Quick start
 
 ```sh
@@ -25,6 +32,7 @@ Boot it, try the Hive, then open **Install ZorpOS** in the Mothership Eye.
 | Path | What |
 |---|---|
 | `archiso/` | archiso profile (based on the official `releng` profile) |
+| `editions/` | hardware editions laid over the profile (see [editions/macbook](../editions/macbook/README.md)) |
 | `packages/` | PKGBUILDs built into the local `[zorpos]` repo (see [AUR.md](AUR.md)) |
 | `shell/` | The Hive desktop shell + Hyprland config ([HIVE.md](HIVE.md)) |
 | `apps/` | Xenoscribe word processor (Rust + GTK4) |
@@ -38,6 +46,7 @@ Boot it, try the Hive, then open **Install ZorpOS** in the Mothership Eye.
 ```sh
 sudo make iso          # -> out/zorpos-YYYY.MM.DD-x86_64.iso
 sudo make iso-fast     # zstd squashfs, much faster, slightly bigger: for dev iteration
+sudo make iso-macbook  # -> out/zorpos-macbook-YYYY.MM.DD-x86_64.iso (any edition: make iso EDITION=<name>)
 ```
 
 `scripts/build-iso.sh` picks a builder automatically:

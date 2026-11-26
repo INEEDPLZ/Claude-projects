@@ -30,6 +30,17 @@ install -Dm644 "$GEN/aurora.svg"                       "$OUT/airootfs/usr/share/
 install -Dm644 "$GEN/tokens.css"                       "$OUT/airootfs/usr/share/zorpos/tokens.css"
 install -Dm644 "$ROOT/themes/tokens.json"              "$OUT/airootfs/usr/share/zorpos/tokens.json"
 
+# --- edition overlay (editions/<name>/: airootfs/ files, packages.add, edition.sh) ---
+if [[ -n ${ZORP_EDITION:-} ]]; then
+  ED="$ROOT/editions/$ZORP_EDITION"
+  [[ -d $ED ]] || { echo "error: no edition '$ZORP_EDITION' in editions/" >&2; exit 1; }
+  [[ -d $ED/airootfs ]] && cp -a "$ED/airootfs/." "$OUT/airootfs/"
+  [[ -f $ED/packages.add ]] && grep -vE '^\s*(#|$)' "$ED/packages.add" >> "$OUT/packages.x86_64"
+  # shellcheck source=/dev/null
+  [[ -f $ED/edition.sh ]] && OUT="$OUT" source "$ED/edition.sh"
+  echo "edition: $ZORP_EDITION"
+fi
+
 # placeholders: @ZORP_VT@ -> console palette, @ZORP_REPO@ -> local [zorpos] repo, @NAME@ -> RRGGBB from tokens
 [[ -f ${ZORP_REPO:-$ROOT/build/repo}/zorpos.db ]] || { echo "error: [zorpos] repo missing; run scripts/build-packages.sh" >&2; exit 1; }
 VT="$(cat "$GEN/vt-params")"

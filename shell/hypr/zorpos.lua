@@ -117,3 +117,12 @@ hl.bind("XF86AudioPlay",         hl.dsp.exec_cmd("playerctl play-pause"), { lock
 hl.bind("XF86AudioPause",        hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioNext",         hl.dsp.exec_cmd("playerctl next"), { locked = true })
 hl.bind("XF86AudioPrev",         hl.dsp.exec_cmd("playerctl previous"), { locked = true })
+
+-- Edition overrides (e.g. the MacBook edition's lighter effects) load last, before your own config.
+local edition = "/usr/share/zorpos/hypr/edition.lua"
+local f = io.open(edition, "r")
+if f then
+    f:close()
+    local ok, err = pcall(dofile, edition)
+    if not ok then print("zorpos: edition.lua failed: " .. tostring(err)) end
+end

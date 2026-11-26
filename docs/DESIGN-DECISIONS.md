@@ -132,3 +132,16 @@ path the tested path (`make test-install`), and the GUI shares it.
 Besides the LTS + Earthling entry, systemd-boot gets "rescue: text console only" (LTS kernel, fallback
 initramfs, `systemd.unit=multi-user.target zorp.tty=1`). A broken GPU driver or shell update always
 leaves a way in from the boot menu alone, without needing the live ISO.
+
+## 26. Hardware editions are overlays, not forks
+The MacBook edition is a folder (`editions/macbook/`) of files, extra packages and a few profile edits
+laid over the normal archiso profile at build time (`make iso EDITION=macbook`). The Hive, apps and
+installer are shared, so a fix lands in both ISOs. The base system only gained hooks that do nothing
+by default: `/etc/zorpos/hive-defaults.json`, `/etc/zorpos/session.env` and
+`/usr/share/zorpos/hypr/edition.lua`.
+
+## 27. "Motion" instead of removing the animation
+On a 2013 MacBook, the always-on widgets redrawing every frame (and Hyprland re-blurring behind them)
+were what made the Hive sluggish. Rather than cut the clock sweep, jar bubbles and heartbeat, they now run
+through one helper (`motion.py`) at Full, Lite (~15 fps) or Still. Opened things (the Eye, planet travel)
+always get full frame rate. Every edition can pick its default; anyone can change it in Personalize Organism.

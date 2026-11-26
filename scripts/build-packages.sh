@@ -14,7 +14,7 @@ FORCE=0; [[ ${1:-} == -f ]] && { FORCE=1; shift; }
 [[ $EUID -eq 0 ]] || { echo "run as root"; exit 1; }
 
 # dependency order matters only for packages that makedepend on each other (none yet)
-ORDER=(zorpos-fonts game-devices-udev xpadneo-dkms vkbasalt protonup-qt-bin zorpos-gamer-hive zorpos-gaming zorpos-hive xenoscribe zorpos-themes calamares zorpos-installer)
+ORDER=(zorpos-fonts game-devices-udev xpadneo-dkms vkbasalt protonup-qt-bin zorpos-gamer-hive zorpos-gaming zorpos-hive xenoscribe zorpos-themes calamares zorpos-installer mbpfan)
 if (( $# )); then ORDER=("$@"); fi
 
 python3 "$ROOT/scripts/gen-tokens.py" >/dev/null

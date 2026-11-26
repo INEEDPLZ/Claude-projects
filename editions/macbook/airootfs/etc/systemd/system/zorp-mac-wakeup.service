@@ -1,0 +1,11 @@
+[Unit]
+Description=ZorpOS MacBook: stop the USB controller from waking the machine right after suspend
+# MacBookPro11,x (2013-2014) and similar wake immediately unless XHC1 wakeups are off
+ConditionPathExists=/sys/devices/platform/applesmc.768
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'grep -q "^XHC1.*enabled" /proc/acpi/wakeup && echo XHC1 > /proc/acpi/wakeup || true'
+
+[Install]
+WantedBy=multi-user.target

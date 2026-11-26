@@ -3,3 +3,4 @@
 /themes/generated/
 *.iso
 /apps/xenoscribe/target/
+__pycache__/

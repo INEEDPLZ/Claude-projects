@@ -1,0 +1,11 @@
+# Extra packages for the MacBook edition (all official repos except mbpfan, built from upstream in packages/)
+# Wi-Fi: Broadcom BCM4360 (MacBookPro11,x and most 2012-2015 Macs) needs Broadcom's wl driver
+broadcom-wl-dkms
+# fans + heat: Apple SMC fan curve, Intel thermal daemon
+mbpfan
+thermald
+# battery: power profiles (Super-quiet / balanced / performance) for the Vitals pod and GNOME-style tools
+power-profiles-daemon
+# Haswell/Broadwell hardware video decode (Firefox, Celluloid): saves a lot of CPU on video
+libva-intel-driver
+libva-utils

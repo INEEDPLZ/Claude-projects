@@ -1,0 +1,28 @@
+# Maintainer: ZorpOS Mothership Collective
+# Fan control daemon for Intel MacBooks (applesmc). AUR-only, so built straight from upstream.
+# Used by the MacBook edition (editions/macbook). The unit only starts on machines with an Apple SMC.
+pkgname=mbpfan
+pkgver=2.5.0
+pkgrel=1
+pkgdesc="Fan control daemon for Intel MacBooks (built for ZorpOS)"
+arch=(x86_64)
+url="https://github.com/linux-on-mac/mbpfan"
+license=(GPL-3.0-or-later)
+depends=(glibc)
+makedepends=(git)
+backup=(etc/mbpfan.conf)
+source=("git+${url}.git#tag=v${pkgver}" mbpfan.service)
+sha256sums=(SKIP SKIP)
+
+build() {
+  make -C mbpfan
+}
+
+package() {
+  # upstream's `make install` targets /usr/sbin and /lib, which are symlinks on Arch
+  install -Dm755 mbpfan/bin/mbpfan          "$pkgdir/usr/bin/mbpfan"
+  install -Dm644 mbpfan/mbpfan.conf         "$pkgdir/etc/mbpfan.conf"
+  install -Dm644 mbpfan/mbpfan.8.gz         "$pkgdir/usr/share/man/man8/mbpfan.8.gz"
+  install -Dm644 mbpfan/README.md           "$pkgdir/usr/share/doc/mbpfan/README.md"
+  install -Dm644 mbpfan.service             "$pkgdir/usr/lib/systemd/system/mbpfan.service"
+}

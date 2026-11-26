@@ -3,7 +3,7 @@
 # + the Zorpglyph alien font. Built from this repo's shell/ and scripts/.
 # zorp-include: shell scripts/gen-glyphs.py scripts/gen-icons.py scripts/gen-aurora.py themes/tokens.json themes/branding
 pkgname=zorpos-hive
-pkgver=0.5.0
+pkgver=0.6.0
 pkgrel=1
 pkgdesc="The Hive: ZorpOS alien desktop shell on Hyprland (with Earthling Mode)"
 arch=(any)

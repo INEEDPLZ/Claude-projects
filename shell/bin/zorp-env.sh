@@ -1,4 +1,7 @@
 # Sourced by zorp-session and zorp-greeter.
+# Editions (e.g. MacBook) and admins can set session variables in /etc/zorpos/session.env.
+# shellcheck source=/dev/null
+[ -r /etc/zorpos/session.env ] && . /etc/zorpos/session.env
 # VMs without 3D (and firmware framebuffers) only have software GL, where GTK4's GPU renderers draw
 # blank text. Use GTK's cairo renderer there; real GPUs keep the default. Set GSK_RENDERER to override.
 if [ -z "$GSK_RENDERER" ]; then

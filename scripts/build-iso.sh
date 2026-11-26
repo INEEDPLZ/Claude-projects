@@ -32,7 +32,7 @@ case $BUILDER in
     rm -rf "$WORK"
     mkarchiso -v -r -w "$WORK" -o "$OUT" "$ROOT/build/profile" ;;
   podman|docker)
-    $BUILDER run --rm --privileged -e ZORP_FAST="${ZORP_FAST:-0}" -v "$ROOT:/zorp" docker.io/archlinux/archlinux:latest \
+    $BUILDER run --rm --privileged -e ZORP_FAST="${ZORP_FAST:-0}" -e ZORP_EDITION="${ZORP_EDITION:-}" -v "$ROOT:/zorp" docker.io/archlinux/archlinux:latest \
       bash -c "pacman-key --init >/dev/null; pacman-key --populate >/dev/null; $inner" ;;
   chroot)
     AR="$(readlink -f "$ROOT/build/archroot" 2>/dev/null || echo "$ROOT/build/archroot")"
@@ -64,7 +64,7 @@ case $BUILDER in
     # clean environment: host CA/tool variables point at paths that don't exist in the chroot
     chroot "$AR" /usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/bin HOME=/root TERM="${TERM:-xterm}" \
       /bin/bash -c "$env_pass
-      export ZORP_FAST='${ZORP_FAST:-0}'
+      export ZORP_FAST='${ZORP_FAST:-0}' ZORP_EDITION='${ZORP_EDITION:-}'
       update-ca-trust
       [[ -d /etc/pacman.d/gnupg ]] || { pacman-key --init; pacman-key --populate archlinux; } >/dev/null
       $inner" ;;

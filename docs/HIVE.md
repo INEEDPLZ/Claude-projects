@@ -70,6 +70,7 @@ The boot parameter `zorp.earthling=1` forces it for that boot (the "LTS, safe gr
 | No transmissions | Personalize Organism → Strange Events, or `zorp-hivectl set transmissions off` |
 | No cursor trail | `zorp-hivectl set cursor_trail off` |
 | No hot corners | `zorp-hivectl set corners off` |
+| Smoother on an old or weak GPU | Personalize Organism → Mode → Motion: **Lite** (~15 fps ambient widgets) or **Still**. The MacBook edition defaults to Lite. |
 | Faster or slower glyph translation | Personalize Organism → Navigation, or edit `glyph_delay_ms` in `~/.config/zorpos/hive.json` |
 | No Hive at login | `touch ~/.config/zorpos/no-autostart`, or the boot parameter `zorp.tty=1` |
 | Hive crashed | Keybinds keep working: `zorp-hivectl` falls back to plain Hyprland actions and Super+D opens fuzzel. Restart it with `zorp-hive &`. |

@@ -1,6 +1,6 @@
 """Hive settings + Earthling Mode state.
 
-Settings live in ~/.config/zorpos/hive.json. Earthling Mode is a plain flag file
+Settings live in ~/.config/zorpos/hive.json, over defaults from /etc/zorpos/hive-defaults.json. Earthling Mode is a plain flag file
 (~/.config/zorpos/earthling) so it can be set from a TTY with `touch`, and is forced on by the
 kernel parameter zorp.earthling=1.
 """
@@ -26,7 +26,15 @@ DEFAULTS = {
         "os.zorp.PersonalizeOrganism.desktop", "net.davidotek.pupgui2.desktop",
     ],
     "planets": 5,
+    "motion": "full",           # full | lite | still: redraw rate of the always-on widgets (see motion.py)
 }
+
+# Editions (e.g. the MacBook edition) ship different defaults here; the user's hive.json still wins.
+SYSTEM_DEFAULTS = Path("/etc/zorpos/hive-defaults.json")
+try:
+    DEFAULTS.update(json.loads(SYSTEM_DEFAULTS.read_text()))
+except (OSError, ValueError):
+    pass
 
 
 def cmdline_earthling():

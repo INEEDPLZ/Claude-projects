@@ -9,7 +9,7 @@ import cairo
 import gi
 from gi.repository import GLib, Gtk
 
-from . import layer
+from . import layer, motion
 from .glyphs import GlyphLabel
 from .theme import rgba
 
@@ -108,7 +108,7 @@ class MediaPod:
             for name in self.manager.props.player_names:
                 self._on_name(self.manager, name)
         GLib.timeout_add(500, self._poll)
-        self.marquee.add_tick_callback(self._tick)
+        motion.drive(self.marquee, self._tick)
         config.connect("earthling-changed", lambda *_: self._refresh_meta())
         self._refresh_meta()
         self.win.set_visible(True)
@@ -173,8 +173,8 @@ class MediaPod:
         self.time_lbl.set_label(f"{f(self.pos)} / {f(self.length)}")
         return True
 
-    def _tick(self, *_):
-        self.scroll += 1.2
+    def _tick(self, dt):
+        self.scroll += 72 * dt
         self.marquee.queue_draw()
         self.orb.queue_draw()
         return True
@@ -267,7 +267,7 @@ class Clock:
         self.win.set_child(ov)
         GLib.timeout_add(1000, self._update)
         self._update()
-        self.area.add_tick_callback(lambda *_: (self.area.queue_draw(), True)[1])
+        motion.redraw(self.area)
         self.win.set_visible(True)
 
     def _update(self):
@@ -359,7 +359,7 @@ class Vitals:
         if psutil:
             psutil.cpu_percent(None)
         GLib.timeout_add(1000, self._sample)
-        self.area.add_tick_callback(self._tick)
+        motion.drive(self.area, self._tick)
         self.win.set_visible(True)
 
     def _sample(self):
@@ -371,25 +371,27 @@ class Vitals:
         self.labels["temp"].set_label(f"{self.temp:.0f}°" if self.temp is not None else "n/a")
         return True
 
-    def _tick(self, *_):
-        # heartbeat: beat rate rises with CPU load; spike height with load too
-        bpm = 50 + self.cpu * 1.1
-        self.phase += bpm / 60 / 60
-        p = self.phase % 1.0
-        amp = 0.35 + self.cpu / 160
-        if p < 0.05:
-            v = amp * math.sin(p / 0.05 * math.pi) * 0.25
-        elif p < 0.09:
-            v = -amp * 0.3
-        elif p < 0.13:
-            v = amp
-        elif p < 0.17:
-            v = -amp * 0.45
-        elif 0.3 < p < 0.42:
-            v = amp * 0.3 * math.sin((p - 0.3) / 0.12 * math.pi)
-        else:
-            v = 0.0
-        self.trace.append(v)
+    def _tick(self, dt):
+        # heartbeat: beat rate rises with CPU load; spike height with load too.
+        # The trace holds one sample per 1/60 s whatever the redraw rate, so lite motion looks the same.
+        for _ in range(max(1, round(dt * 60))):
+            bpm = 50 + self.cpu * 1.1
+            self.phase += bpm / 60 / 60
+            p = self.phase % 1.0
+            amp = 0.35 + self.cpu / 160
+            if p < 0.05:
+                v = amp * math.sin(p / 0.05 * math.pi) * 0.25
+            elif p < 0.09:
+                v = -amp * 0.3
+            elif p < 0.13:
+                v = amp
+            elif p < 0.17:
+                v = -amp * 0.45
+            elif 0.3 < p < 0.42:
+                v = amp * 0.3 * math.sin((p - 0.3) / 0.12 * math.pi)
+            else:
+                v = 0.0
+            self.trace.append(v)
         self.area.queue_draw()
         return True
 

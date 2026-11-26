@@ -124,6 +124,14 @@ class Organism(Gtk.Application):
                  "English labels, a normal dock and normal workspaces. Super+Shift+E toggles it anywhere.")
         if self.cfg.forced:
             mode.row("Forced on", Gtk.Label(label="zorp.earthling=1"), "Set by the boot menu for this session.")
+        levels = ["full", "lite", "still"]
+        mot = Gtk.DropDown.new_from_strings(["Full (every frame)", "Lite (calm, ~15 fps)", "Still (numbers only)"])
+        cur = self.cfg.get("motion")
+        mot.set_selected(levels.index(cur) if cur in levels else 0)
+        mot.connect("notify::selected", lambda d, _p: (self.cfg.set("motion", levels[d.get_selected()]),
+                                                       hivectl("quit"), self._restart_hive()))
+        mode.row("Motion", mot, "How often the jars, clock, vitals and media pod animate. "
+                 "Lite or Still makes older laptops much smoother.")
         grid.append(mode)
 
         ev = Pod("Strange Events", 23, "zorp-lilac")

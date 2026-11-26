@@ -15,6 +15,7 @@ the local `[zorpos]` repo that ships inside the ISO.
 | `zorpos-gamer-hive` | 2 | ours: replaces AUR `gamescope-session-steam` | this repo |
 | `zorpos-gaming` | 2 | ours: metapackage + config | this repo |
 | `calamares` | 6 | installer framework; not in official repos | github.com/calamares/calamares, tag v3.3.14 (Qt6) |
+| `mbpfan` | MacBook | Intel MacBook fan control is AUR-only | github.com/linux-on-mac/mbpfan, tag v2.5.0 (our unit: starts only where an Apple SMC exists) |
 | `zorpos-installer` | 6 | ours: Abduction Sequence config + branding + `zorp-install-target` / `zorp-install-cli` | this repo |
 | `zorpos-hive`, `xenoscribe`, `zorpos-themes` | 3–5 | ours | this repo |
 

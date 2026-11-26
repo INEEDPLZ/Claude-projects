@@ -8,7 +8,7 @@ gi.require_version("Gdk", "4.0")
 from gi.repository import Gio, GLib, Gtk  # noqa: E402
 
 from . import APP_ID, __version__  # noqa: E402
-from . import glyphs, hypr, theme  # noqa: E402
+from . import glyphs, hypr, motion, theme  # noqa: E402
 from .config import Config  # noqa: E402
 
 
@@ -23,6 +23,7 @@ class Hive(Gtk.Application):
         self.hold()  # no regular windows; stay alive
         self.cfg = Config()
         glyphs.bind_config(self.cfg)
+        motion.set_level(self.cfg.get("motion"))
         theme.install_css()
         from .dock import Dock
         from .events import Events
@@ -61,7 +62,7 @@ class Hive(Gtk.Application):
 
         from . import firstboot
         firstboot.maybe_show(self, self.cfg)
-        print(f"[hive] The Hive {__version__} online (earthling={self.cfg.earthling}, "
+        print(f"[hive] The Hive {__version__} online (earthling={self.cfg.earthling}, motion={motion.level()}, "
               f"hyprland={hypr.available()})", file=sys.stderr)
 
     def _set(self, key, value):
