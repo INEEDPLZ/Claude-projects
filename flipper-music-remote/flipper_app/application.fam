@@ -1,0 +1,13 @@
+App(
+    appid="fliptune",
+    name="FlipTune Remote",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="fliptune_app",
+    requires=["gui", "bt"],
+    stack_size=3 * 1024,
+    fap_category="Bluetooth",
+    fap_icon="fliptune_10px.png",
+    fap_version="1.0",
+    fap_description="Apple Music now-playing display + media remote over Bluetooth (needs the FlipTune companion on iPhone or Mac)",
+    fap_author="FlipTune",
+)
