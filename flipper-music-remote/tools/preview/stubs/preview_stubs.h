@@ -7,6 +7,8 @@
 #include <string.h>
 
 #define UNUSED(x) (void)(x)
+#define COUNT_OF(x) (sizeof(x) / sizeof((x)[0]))
+#define APP_DATA_PATH(p) "/ext/apps_data/x/" p
 #define FURI_LOG_W(...) ((void)0)
 #define FURI_LOG_E(...) ((void)0)
 #define FuriWaitForever 0xFFFFFFFFu
@@ -33,6 +35,7 @@ static inline uint32_t furi_ms_to_ticks(uint32_t ms) { return ms; }
 static inline void furi_delay_ms(uint32_t ms) { (void)ms; }
 static inline uint32_t furi_hal_random_get(void) { return 0x12345678; }
 static inline void furi_hal_bt_start_advertising(void) {}
+static inline void furi_hal_bt_stop_advertising(void) {}
 static inline const char* furi_hal_version_get_name_ptr(void) { return "Zorp"; }
 FuriMessageQueue* furi_message_queue_alloc(uint32_t, uint32_t);
 void furi_message_queue_free(FuriMessageQueue*);

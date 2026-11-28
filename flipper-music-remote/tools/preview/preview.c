@@ -1,13 +1,13 @@
 /* Desktop preview harness: compiles the real FlipTune drawing + protocol code
  * against a fake 128x64 canvas and replays a scripted session.
- *   stdin : script lines  "C <ms> <0|1>" | "R <ms> <hex>" | "I <ms> <key> <type>" | "E <ms>"
+ *   stdin : script lines  "C <ms> <0|1>" | "I <ms> <key> <type>" | "E <ms>"
  *   stdout: one 8192-byte frame (0/1 per pixel) every 33 ms                        */
 #include <stdio.h>
 #include "fonts.h"
 #include "stubs/gui/gui.h"
 #include "stubs/notification/notification_messages.h"
 #include "stubs/bt/bt_service/bt.h"
-#include "stubs/profiles/serial_profile.h"
+#include "stubs/extra_profiles/hid_profile.h"
 
 struct Canvas {
     uint8_t px[64][128];
@@ -102,21 +102,20 @@ void canvas_draw_rframe(Canvas* c, int32_t x, int32_t y, size_t w, size_t h, siz
 }
 
 /* ---- unused SDK pieces the app links against ---- */
-const NotificationMessage message_vibro_on, message_vibro_off, message_delay_10;
+const NotificationMessage message_vibro_on, message_vibro_off, message_delay_10, message_delay_25;
 const NotificationSequence sequence_blink_blue_100 = {NULL};
-const FuriHalBleProfileTemplate* const ble_profile_serial = NULL;
+const FuriHalBleProfileTemplate* ble_profile_hid = NULL;
 void notification_message(NotificationApp* n, const NotificationSequence* s) { (void)n; (void)s; }
 FuriHalBleProfileBase* bt_profile_start(Bt* b, const FuriHalBleProfileTemplate* t, void* p) { (void)b; (void)t; (void)p; return NULL; }
 bool bt_profile_restore_default(Bt* b) { (void)b; return true; }
 void bt_disconnect(Bt* b) { (void)b; }
 void bt_set_status_changed_callback(Bt* b, BtStatusChangedCallback cb, void* x) { (void)b; (void)cb; (void)x; }
-bool ble_profile_serial_tx(FuriHalBleProfileBase* p, uint8_t* d, uint16_t n) {
-    (void)p;
-    fprintf(stderr, "[%5u ms] TX cmd=%u\n", g_now, n >= 5 ? d[4] : 0);
-    return true;
-}
-void ble_profile_serial_set_rpc_active(FuriHalBleProfileBase* p, bool a) { (void)p; (void)a; }
-void ble_profile_serial_set_event_callback(FuriHalBleProfileBase* p, uint16_t s, FuriHalBtSerialCallback cb, void* x) { (void)p; (void)s; (void)cb; (void)x; }
+void bt_forget_bonded_devices(Bt* b) { (void)b; }
+void bt_keys_storage_set_storage_path(Bt* b, const char* p) { (void)b; (void)p; }
+void bt_keys_storage_set_default_path(Bt* b) { (void)b; }
+bool ble_profile_hid_consumer_key_press(FuriHalBleProfileBase* p, uint16_t k) { (void)p; fprintf(stderr, "[%5u ms] HID press 0x%02X\n", g_now, k); return true; }
+bool ble_profile_hid_consumer_key_release(FuriHalBleProfileBase* p, uint16_t k) { (void)p; (void)k; return true; }
+bool ble_profile_hid_consumer_key_release_all(FuriHalBleProfileBase* p) { (void)p; return true; }
 FuriMessageQueue* furi_message_queue_alloc(uint32_t a, uint32_t b) { (void)a; (void)b; return NULL; }
 void furi_message_queue_free(FuriMessageQueue* q) { (void)q; }
 FuriStatus furi_message_queue_put(FuriMessageQueue* q, const void* m, uint32_t t) { (void)q; (void)m; (void)t; return FuriStatusOk; }
@@ -146,9 +145,9 @@ int main(void) {
     static App app;
     static Canvas canvas;
     memset(&app, 0, sizeof(app));
-    app.m.volume = 255;
     app.rng = 0x1234567;
-    app.profile = (FuriHalBleProfileBase*)&app; /* non-NULL so send_cmd "transmits" */
+    app.hid = (FuriHalBleProfileBase*)&app;
+    app.m.tape_no = 1;
     app.bt_status = BtStatusAdvertising;
 
     char line[8192];
@@ -168,14 +167,6 @@ int main(void) {
             have = false;
             if(kind == 'E') { end = true; break; }
             if(kind == 'C') app.bt_status = atoi(rest) ? BtStatusConnected : BtStatusAdvertising;
-            if(kind == 'R') {
-                for(char* p = rest; p[0] && p[1]; p += 2) {
-                    unsigned b;
-                    sscanf(p, "%2x", &b);
-                    parse_byte(&app, (uint8_t)b);
-                }
-                app.m.last_rx_tick = now_ms();
-            }
             if(kind == 'I') {
                 int k, t;
                 sscanf(rest, "%d %d", &k, &t);
@@ -184,7 +175,7 @@ int main(void) {
             }
         }
         connection_step(&app);
-        step_anim(&app);
+        step(&app);
         draw_cb(&canvas, &app);
         fwrite(canvas.px, 1, sizeof(canvas.px), stdout);
     }

@@ -2,9 +2,8 @@ flipper_app/dist/
 flipper_app/.vscode/
 flipper_app/.clang-format
 flipper_app/.editorconfig
-tools/preview/fliptune_preview
-tools/preview/out/
-companion-ios/*.xcodeproj
-companion-ios/FlipTune/Info.plist
-__pycache__/
+flipper_app/.gitignore
 tools/preview/fonts.h
+tools/preview/deck_preview
+tools/preview/out/
+__pycache__/

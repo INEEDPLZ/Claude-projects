@@ -1,13 +1,14 @@
 App(
     appid="fliptune",
-    name="FlipTune Remote",
+    name="TAPE//DECK",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="fliptune_app",
     requires=["gui", "bt"],
-    stack_size=3 * 1024,
+    stack_size=2 * 1024,
+    fap_libs=["ble_profile"],
     fap_category="Bluetooth",
     fap_icon="fliptune_10px.png",
-    fap_version="1.0",
-    fap_description="Apple Music now-playing display + media remote over Bluetooth (needs the FlipTune companion on iPhone or Mac)",
+    fap_version="2.0",
+    fap_description="Cyberdeck cassette-player Bluetooth media remote for Apple Music. Pair from iPhone Settings > Bluetooth, no app needed.",
     fap_author="FlipTune",
 )
